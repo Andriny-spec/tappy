@@ -123,7 +123,7 @@ export default async function DashboardPage() {
           <h2 className="text-xl font-semibold dark:text-gray-100">Métricas por Plataforma</h2>
           <TabsList className="bg-gray-100 dark:bg-gray-800">
             <TabsTrigger value="all">Todas</TabsTrigger>
-            <TabsTrigger value="tappyid">Tappy ID</TabsTrigger>
+            <TabsTrigger value="tappylink">Tappy Link</TabsTrigger>
             <TabsTrigger value="tappywhats">Tappy WhatsApp</TabsTrigger>
             <TabsTrigger value="tappyimob">Tappy Imob</TabsTrigger>
           </TabsList>

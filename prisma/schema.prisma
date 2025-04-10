@@ -87,7 +87,6 @@ model Plan {
   features            String[]
   price               Float
   interval            String
-  checkoutLink        String?      // Link do checkout do Kirvano
   isActive            Boolean      @default(true)
   isHighlighted       Boolean      @default(false)
   createdAt           DateTime     @default(now())
@@ -113,6 +112,7 @@ model Plan {
   maxUsers            Int?
   setupFee            Float?
   shortDescription    String?
+  checkoutLink        String?
   payments            Payment[]
   platform            Platform     @relation(fields: [platformId], references: [id], onDelete: Cascade)
   subscribers         Subscriber[]

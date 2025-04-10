@@ -48,11 +48,11 @@ const mockPieChartData = [
 ];
 
 const mockTransacoesData = [
-  { data: '15/10/2023', assinante: 'Carlos Silva', valor: 'R$ 149,90', plano: 'Tappy ID - Premium', metodo: 'PIX' },
+  { data: '15/10/2023', assinante: 'Carlos Silva', valor: 'R$ 149,90', plano: 'Tappy Link - Premium', metodo: 'PIX' },
   { data: '14/10/2023', assinante: 'Maria Oliveira', valor: 'R$ 249,90', plano: 'Tappy Whats - Empresarial', metodo: 'Cartão de Crédito' },
-  { data: '13/10/2023', assinante: 'João Pereira', valor: 'R$ 149,90', plano: 'Tappy ID - Premium', metodo: 'PIX' },
-  { data: '12/10/2023', assinante: 'Ana Carolina', valor: 'R$ 99,90', plano: 'Tappy ID - Básico', metodo: 'Cartão de Débito' },
-  { data: '11/10/2023', assinante: 'Rodrigo Alves', valor: 'R$ 149,90', plano: 'Tappy ID - Premium', metodo: 'PIX' },
+  { data: '13/10/2023', assinante: 'João Pereira', valor: 'R$ 149,90', plano: 'Tappy Link - Premium', metodo: 'PIX' },
+  { data: '12/10/2023', assinante: 'Ana Carolina', valor: 'R$ 99,90', plano: 'Tappy Link - Básico', metodo: 'Cartão de Débito' },
+  { data: '11/10/2023', assinante: 'Rodrigo Alves', valor: 'R$ 149,90', plano: 'Tappy Link - Premium', metodo: 'PIX' },
 ];
 
 export default function RelatoriosPage() {

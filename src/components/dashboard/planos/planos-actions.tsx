@@ -48,29 +48,26 @@ export default function PlanosActions() {
     isActive: true,
   });
 
-  // Carregar as plataformas quando o componente montar
+  // Carrega as plataformas do banco de dados
   useEffect(() => {
     const loadPlatforms = async () => {
       try {
         setIsLoadingPlatforms(true);
-        const { platforms: fetchedPlatforms, error } = await getAllPlatforms();
+        const { platforms, error } = await getAllPlatforms();
         
         if (error) {
-          console.error('Erro ao carregar plataformas:', error);
-          return;
-        }
-        
-        setPlatforms(fetchedPlatforms);
-        
-        // Define o platformId inicial para a primeira plataforma, se disponível
-        if (fetchedPlatforms.length > 0) {
+          setFormError("Erro ao carregar plataformas: " + error);
+        } else if (platforms && platforms.length > 0) {
+          setPlatforms(platforms);
+          // Define a primeira plataforma como padrão
           setFormValues(prev => ({
             ...prev,
-            platformId: fetchedPlatforms[0].id
+            platformId: platforms[0].id
           }));
         }
-      } catch (err) {
-        console.error('Erro ao carregar plataformas:', err);
+      } catch (error) {
+        console.error("Erro ao carregar plataformas:", error);
+        setFormError("Erro ao carregar plataformas. Tente novamente.");
       } finally {
         setIsLoadingPlatforms(false);
       }
@@ -84,6 +81,11 @@ export default function PlanosActions() {
   };
 
   const handleFormChange = (field: string, value: any) => {
+    // Se for um campo numérico, garantir que seja um número com no máximo 2 casas decimais
+    if (field === 'price' && typeof value === 'string') {
+      value = parseFloat(parseFloat(value).toFixed(2));
+    }
+    
     setFormValues(prev => ({
       ...prev,
       [field]: value
@@ -125,11 +127,31 @@ export default function PlanosActions() {
       // Filtra features vazias
       const filteredFeatures = formValues.features.filter(f => f.trim() !== '');
       
-      // Prepara os dados para envio
+      // Prepara os dados para envio com todas as propriedades obrigatórias
       const planData = {
-        ...formValues,
-        price: Number(formValues.price),
+        name: formValues.name,
+        description: formValues.description,
+        shortDescription: formValues.description.substring(0, 100), // Versão curta da descrição
         features: filteredFeatures.length > 0 ? filteredFeatures : ['Recurso básico'],
+        price: typeof formValues.price === 'string' ? parseFloat(parseFloat(formValues.price).toFixed(2)) : formValues.price,
+        discount: 0, // Valor padrão
+        interval: formValues.interval,
+        checkoutLink: formValues.checkoutLink,
+        platformId: formValues.platformId,
+        isActive: formValues.isActive,
+        isHighlighted: false,
+        benefits: [],
+        displayOrder: 0,
+        hasAI: false,
+        hasClientPortal: false,
+        hasLeadManagement: true,
+        hasMultiChannel: false,
+        hasRentalManagement: false,
+        hasReports: true,
+        hasSalesTools: true,
+        hasTeamManagement: false,
+        isFeatured: false,
+        isUnlimited: false,
       };
 
       const response = await createPlan(planData);
@@ -143,7 +165,7 @@ export default function PlanosActions() {
       setFormValues({
         name: '',
         description: '',
-        platformId: 'tappyid',
+        platformId: 'tappylink',
         price: 0,
         interval: 'monthly',
         features: [''],
@@ -170,8 +192,8 @@ export default function PlanosActions() {
             <TabsTrigger value="todos">
               Todos
             </TabsTrigger>
-            <TabsTrigger value="tappyid">
-              Tappy ID
+            <TabsTrigger value="tappylink">
+              Tappy Link
             </TabsTrigger>
             <TabsTrigger value="tappywhats">
               Tappy WhatsApp
@@ -247,7 +269,7 @@ export default function PlanosActions() {
                         <SelectValue placeholder="Selecione uma plataforma" />
                       </SelectTrigger>
                       <SelectContent>
-                        {platforms.map((platform) => (
+                        {platforms.map(platform => (
                           <SelectItem key={platform.id} value={platform.id}>
                             {platform.name}
                           </SelectItem>
@@ -265,7 +287,11 @@ export default function PlanosActions() {
                     min="0" 
                     step="0.01"
                     value={formValues.price} 
-                    onChange={(e) => handleFormChange('price', e.target.value)}
+                    onChange={(e) => {
+                      // Garante que o valor tenha no máximo 2 casas decimais
+                      const value = parseFloat(parseFloat(e.target.value).toFixed(2));
+                      handleFormChange('price', value);
+                    }}
                   />
                 </div>
               </div>
@@ -280,10 +306,11 @@ export default function PlanosActions() {
                     <SelectValue placeholder="Selecione o intervalo" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="monthly">Mensal</SelectItem>
-                    <SelectItem value="quarterly">Trimestral</SelectItem>
-                    <SelectItem value="semiannual">Semestral</SelectItem>
-                    <SelectItem value="annual">Anual</SelectItem>
+                    <SelectItem value="month">Mensal</SelectItem>
+                    <SelectItem value="quarter">Trimestral</SelectItem>
+                    <SelectItem value="semester">Semestral</SelectItem>
+                    <SelectItem value="year">Anual</SelectItem>
+                    <SelectItem value="once">Pagamento Único</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

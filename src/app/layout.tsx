@@ -18,8 +18,8 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Tappy | Tecnologia Inteligente para Transformar Conexões",
-  description: "Tappy oferece um ecossistema exclusivo de soluções digitais que transformam a maneira como interagimos no mundo corporativo. Integre Tappy ID, Tappy Whats e Tappy Imob para revolucionar seu negócio com inovação e elegância.",
-  keywords: ["Tappy", "Tappy ID", "Tappy Whats", "Tappy Imob", "CRM", "Imobiliária", "WhatsApp", "Cartão Virtual", "Networking", "Cartão Digital", "Identidade Digital", "Automação", "Marketing Digital", "Conexões Profissionais"],
+  description: "Tappy oferece um ecossistema exclusivo de soluções digitais que transformam a maneira como interagimos no mundo corporativo. Integre Tappy Link, Tappy Whats e Tappy Imob para revolucionar seu negócio com inovação e elegância.",
+  keywords: ["Tappy", "Tappy Link", "Tappy Whats", "Tappy Imob", "CRM", "Imobiliária", "WhatsApp", "Cartão Virtual", "Networking", "Cartão Digital", "Identidade Digital", "Automação", "Marketing Digital", "Conexões Profissionais"],
   authors: [{ name: "Tappy" }],
   creator: "Tappy",
   publisher: "Tappy Technologies",

@@ -21,8 +21,8 @@ export async function POST(req: NextRequest) {
       // @ts-ignore
       prisma.platform.create({
         data: {
-          name: 'Tappy ID',
-          slug: 'id',
+          name: 'Tappy Link',
+          slug: 'link',
           url: 'https://link.tappy.id',
           description: 'Plataforma de cartões virtuais',
         },

@@ -23,12 +23,12 @@ async function main() {
   console.log('Senha do admin:', password);
 
   // Criar plataformas
-  const tappyId = await prisma.platform.upsert({
-    where: { slug: 'tappyid' },
+  const tappyLink = await prisma.platform.upsert({
+    where: { slug: 'tappylink' },
     update: {},
     create: {
-      name: 'Tappy ID',
-      slug: 'tappyid',
+      name: 'Tappy Link',
+      slug: 'tappylink',
       url: 'https://link.tappy.id',
       description: 'Plataforma de identidade digital e cartões digitais',
     },
@@ -59,14 +59,14 @@ async function main() {
   console.log('Plataformas criadas com sucesso!');
   
   // Criar planos para as plataformas
-  const planoTappyIdBasico = await prisma.plan.upsert({
-    where: { id: 'tappyid-basico' },
+  const planoTappyLinkBasico = await prisma.plan.upsert({
+    where: { id: 'tappylink-basico' },
     update: {},
     create: {
-      id: 'tappyid-basico',
-      name: 'Tappy ID Básico',
-      platformId: tappyId.id,
-      description: 'Plano básico para Tappy ID',
+      id: 'tappylink-basico',
+      name: 'Tappy Link Básico',
+      platformId: tappyLink.id,
+      description: 'Plano básico para Tappy Link',
       features: ['Cartão digital', 'Site personalizado', 'QR Code ilimitado'],
       price: 49.90,
       interval: 'month',
@@ -78,14 +78,14 @@ async function main() {
     },
   });
 
-  const planoTappyIdPremium = await prisma.plan.upsert({
-    where: { id: 'tappyid-premium' },
+  const planoTappyLinkPremium = await prisma.plan.upsert({
+    where: { id: 'tappylink-premium' },
     update: {},
     create: {
-      id: 'tappyid-premium',
-      name: 'Tappy ID Premium',
-      platformId: tappyId.id,
-      description: 'Plano premium para Tappy ID',
+      id: 'tappylink-premium',
+      name: 'Tappy Link Premium',
+      platformId: tappyLink.id,
+      description: 'Plano premium para Tappy Link',
       features: ['Cartão digital', 'Site personalizado', 'QR Code ilimitado', 'Domínio próprio', 'Analytics avançado'],
       price: 97.00,
       interval: 'month',
@@ -148,8 +148,8 @@ async function main() {
       name: 'Carlos Silva',
       email: 'carlos.silva@gmail.com',
       phone: '11987654321',
-      planId: planoTappyIdPremium.id,
-      platformId: tappyId.id,
+      planId: planoTappyLinkPremium.id,
+      platformId: tappyLink.id,
       status: 'active',
       startDate: new Date('2025-01-15'),
     },
@@ -175,8 +175,8 @@ async function main() {
       name: 'Juliana Mendes',
       email: 'juliana.mendes@outlook.com',
       phone: '11954321098',
-      planId: planoTappyIdPremium.id,
-      platformId: tappyId.id,
+      planId: planoTappyLinkPremium.id,
+      platformId: tappyLink.id,
       status: 'canceled',
       startDate: new Date('2025-03-10'),
       cancelDate: new Date('2025-04-05'),
@@ -196,8 +196,8 @@ async function main() {
       name: 'Paulo Oliveira',
       email: 'paulo.oliveira@gmail.com',
       phone: '11932165478',
-      planId: planoTappyIdBasico.id, 
-      platformId: tappyId.id,
+      planId: planoTappyLinkBasico.id, 
+      platformId: tappyLink.id,
       status: 'active',
       startDate: new Date('2025-01-20'),
     },
@@ -205,8 +205,8 @@ async function main() {
       name: 'Fernanda Lima',
       email: 'fernanda.lima@outlook.com',
       phone: '21987451236',
-      planId: planoTappyIdPremium.id,
-      platformId: tappyId.id,
+      planId: planoTappyLinkBasico.id,
+      platformId: tappyLink.id,
       status: 'active',
       startDate: new Date('2025-02-10'),
     },
@@ -223,8 +223,8 @@ async function main() {
       name: 'Mariana Costa',
       email: 'mariana.costa@hotmail.com',
       phone: '31974125896',
-      planId: planoTappyIdBasico.id,
-      platformId: tappyId.id,
+      planId: planoTappyLinkBasico.id,
+      platformId: tappyLink.id,
       status: 'overdue',
       startDate: new Date('2025-01-25'),
     },
@@ -241,8 +241,8 @@ async function main() {
       name: 'Patrícia Gomes',
       email: 'patricia.gomes@outlook.com',
       phone: '21963258741',
-      planId: planoTappyIdPremium.id,
-      platformId: tappyId.id,
+      planId: planoTappyLinkPremium.id,
+      platformId: tappyLink.id,
       status: 'canceled',
       startDate: new Date('2025-02-20'),
       cancelDate: new Date('2025-03-25'),
@@ -261,8 +261,8 @@ async function main() {
       name: 'Camila Ribeiro',
       email: 'camila.ribeiro@hotmail.com',
       phone: '47912365478',
-      planId: planoTappyIdBasico.id,
-      platformId: tappyId.id,
+      planId: planoTappyLinkBasico.id,
+      platformId: tappyLink.id,
       status: 'active',
       startDate: new Date('2025-03-20'),
     },
@@ -279,8 +279,8 @@ async function main() {
       name: 'Carla Martins',
       email: 'carla.martins@outlook.com',
       phone: '21985214796',
-      planId: planoTappyIdPremium.id,
-      platformId: tappyId.id,
+      planId: planoTappyLinkPremium.id,
+      platformId: tappyLink.id,
       status: 'active',
       startDate: new Date('2025-02-28'),
     }
@@ -334,8 +334,8 @@ async function main() {
           userId: user.id,
           subscriberId: subscriber.id,
           planId: usuario.planId,
-          amount: usuario.planId === planoTappyIdBasico.id ? 49.90 :
-                usuario.planId === planoTappyIdPremium.id ? 97.00 :
+          amount: usuario.planId === planoTappyLinkBasico.id ? 49.90 :
+                usuario.planId === planoTappyLinkPremium.id ? 97.00 :
                 usuario.planId === planoTappyWhatsPro.id ? 59.90 :
                 usuario.planId === planoTappyImobCompleto.id ? 127.00 : 0,
           status: usuario.status === 'active' ? 'paid' : 'overdue',

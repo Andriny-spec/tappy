@@ -102,7 +102,7 @@ export const authOptions: NextAuthOptions = {
     async redirect({ url, baseUrl }) {
       // Redireciona para dashboard após o login
       if (url.startsWith("/api/auth") || url === "/login" || url === baseUrl) {
-        return `${baseUrl}/dashboard/dashboard`;
+        return `${baseUrl}/dashboard/`;
       }
       // Se a URL já for uma URL válida, retorne-a
       if (url.startsWith("http")) {
