@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,10 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
@@ -22,15 +20,12 @@ import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import {
   SendHorizontal,
-  Phone,
   Mail,
   Users,
-  FileSpreadsheet,
   Upload,
   Calendar as CalendarIcon,
   Check,
   Clock,
-  Trash2,
   PlusCircle,
   X,
   MessageSquare,
@@ -159,7 +154,7 @@ export default function DisparosPage() {
     }
     
     // Processar destinatários do campo manual
-    const listaDestinatarios = destinatariosManual
+    destinatariosManual
       .split(/[,;\n]/)
       .map(item => item.trim())
       .filter(item => item.length > 0);
@@ -502,7 +497,7 @@ export default function DisparosPage() {
                 />
                 {tipoDisparo === "WHATSAPP" && (
                   <p className="text-xs text-gray-500">
-                    <strong>Dica:</strong> Use {"{nome}"} para personalizar a mensagem com o nome do destinatário.
+                    <strong>Dica:</strong> Use {'{nome}'} para personalizar a mensagem com o nome do destinatário.
                   </p>
                 )}
               </div>
