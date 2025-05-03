@@ -1,14 +1,13 @@
 'use client';
 
-import { useState, useEffect } from "react";
-import { format, differenceInDays } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { useState } from 'react';
 import { 
   Card, 
   CardContent, 
   CardDescription, 
   CardHeader, 
-  CardTitle 
+  CardTitle,
+  CardFooter 
 } from '@/components/ui/card';
 import { 
   Table, 
@@ -28,16 +27,31 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   CreditCard, 
-  Download, 
+  Download,
+  DollarSign,
+  RefreshCcw, 
   Filter, 
   Search,
   ArrowUpDown,
   MoreHorizontal,
   Calendar,
   Check,
-  X
+  X,
+  Clock,
+  CreditCardIcon,
+  FileText,
+  CalendarIcon,
+  TrendingUp,
+  ShoppingCart,
+  AlertCircle,
+  Wallet,
+  Eye,
+  Mail,
+  BarChart4,
+  FileDown
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -47,12 +61,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Progress } from "@/components/ui/progress";
-import { ExternalLink } from "lucide-react";
+import { Separator } from '@/components/ui/separator';
+import { motion } from 'framer-motion';
 
-// Interface para tipagem dos pagamentos
-interface Pagamento {
+// Definindo tipos para pagamentos
+type Pagamento = {
   id: string;
   cliente: string;
   email: string;
@@ -61,470 +74,456 @@ interface Pagamento {
   metodo: string;
   plano: string;
   status: string;
-  plataforma?: string;
-  inicio?: string;
-  fim?: string;
-  transactionId?: string;
-  receiptUrl?: string;
-}
+};
+
+// Array vazio para pagamentos
+const pagamentosVazios: Pagamento[] = [];
 
 export default function PagamentosPage() {
-  const [pagamentos, setPagamentos] = useState<Pagamento[]>([]);
   const [filtro, setFiltro] = useState('');
-  const [statusFiltro, setStatusFiltro] = useState('todos');
-  const [metodoFiltro, setMetodoFiltro] = useState('todos');
-  const [plataformaFiltro, setPlataformaFiltro] = useState('todos');
-  const [dataInicio, setDataInicio] = useState('');
-  const [dataFim, setDataFim] = useState('');
-  const [carregando, setCarregando] = useState(true);
-  const [resumo, setResumo] = useState({
-    totalRecebido: 0,
-    reembolsos: 0,
-    transacoes: 0,
-    ticketMedio: 0
-  });
+  const [activeTab, setActiveTab] = useState('todos');
+  const [periodo, setPeriodo] = useState('ultimo-mes');
   
-  // Modal de detalhes
-  const [modalAberto, setModalAberto] = useState(false);
-  const [pedidoSelecionado, setPedidoSelecionado] = useState<Pagamento | null>(null);
-  
-  // Buscar dados reais de pagamentos
-  useEffect(() => {
-    const buscarPagamentos = async () => {
-      try {
-        setCarregando(true);
-        const resposta = await fetch('/api/dashboard/pagamentos');
-        
-        if (!resposta.ok) {
-          throw new Error(`Erro ao buscar pagamentos: ${resposta.status}`);
-        }
-        
-        const dados = await resposta.json();
-        setPagamentos(dados.pagamentos);
-        setResumo(dados.resumo);
-      } catch (erro) {
-        console.error('Erro ao buscar pagamentos:', erro);
-        // Em caso de erro, podemos manter alguns dados mockados para demonstração
-        setPagamentos([
-          {
-            id: '1',
-            cliente: 'Carlos Silva',
-            email: 'carlos.silva@gmail.com',
-            data: '27/03/2025',
-            valor: 'R$ 97,00',
-            metodo: 'Cartão de Crédito',
-            plano: 'Tappy Link Premium',
-            status: 'Aprovado',
-            plataforma: 'Tappy Link'
-          },
-          {
-            id: '2',
-            cliente: 'Ana Rodrigues',
-            email: 'ana.rodrigues@hotmail.com',
-            data: '26/03/2025',
-            valor: 'R$ 59,90',
-            metodo: 'PIX',
-            plano: 'Tappy WhatsApp Pro',
-            status: 'Aprovado',
-            plataforma: 'Tappy WhatsApp'
-          }
-        ]);
-      } finally {
-        setCarregando(false);
-      }
-    };
-    
-    buscarPagamentos();
-  }, []);
-  
-  // Funções de filtro
-  const pagamentosFiltrados = pagamentos.filter(pagamento => {
-    // Filtro de texto
-    const textoMatch = 
-      pagamento.cliente.toLowerCase().includes(filtro.toLowerCase()) ||
-      pagamento.email.toLowerCase().includes(filtro.toLowerCase()) ||
-      pagamento.plano.toLowerCase().includes(filtro.toLowerCase()) ||
-      pagamento.id.toLowerCase().includes(filtro.toLowerCase());
-    
-    // Filtro de status
-    const statusMatch = statusFiltro === 'todos' || pagamento.status.toLowerCase() === statusFiltro.toLowerCase();
-    
-    // Filtro de método
-    const metodoMatch = metodoFiltro === 'todos' || pagamento.metodo.toLowerCase().includes(metodoFiltro.toLowerCase());
-    
-    // Filtro de plataforma
-    const plataformaMatch = plataformaFiltro === 'todos' || 
-      (pagamento.plataforma && pagamento.plataforma.toLowerCase() === plataformaFiltro.toLowerCase());
-    
-    // Filtro de data de início
-    const dataInicioObj = dataInicio ? new Date(dataInicio) : null;
-    const dataInicioMatch = !dataInicioObj || new Date(pagamento.data) >= dataInicioObj;
-    
-    // Filtro de data de fim
-    const dataFimObj = dataFim ? new Date(dataFim) : null;
-    const dataFimMatch = !dataFimObj || new Date(pagamento.data) <= dataFimObj;
-    
-    return textoMatch && statusMatch && metodoMatch && plataformaMatch && dataInicioMatch && dataFimMatch;
-  });
+  // Não temos pagamentos - estado vazio
+  const pagamentos: Pagamento[] = [];
   
   // Renderização do status com cores apropriadas
   const renderStatus = (status: string) => {
-    switch(status.toLowerCase()) {
-      case 'aprovado':
+    switch(status) {
+      case 'Aprovado':
         return <Badge className="bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-800/20 dark:text-green-400"><Check className="h-3 w-3 mr-1" /> {status}</Badge>;
-      case 'pendente':
-        return <Badge variant="outline" className="text-amber-600 border-amber-300 dark:text-amber-400"><Calendar className="h-3 w-3 mr-1" /> {status}</Badge>;
-      case 'reembolsado':
+      case 'Pendente':
+        return <Badge variant="outline" className="text-amber-600 border-amber-300 dark:text-amber-400"><Clock className="h-3 w-3 mr-1" /> {status}</Badge>;
+      case 'Reembolsado':
         return <Badge className="bg-red-100 text-red-800 hover:bg-red-100 dark:bg-red-800/20 dark:text-red-400"><X className="h-3 w-3 mr-1" /> {status}</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
   };
 
-  // Função para abrir o modal de detalhes
-  const abrirDetalhes = (pagamento: Pagamento) => {
-    setPedidoSelecionado(pagamento);
-    setModalAberto(true);
-  };
-
-  // Calcular o progresso do plano
-  const calcularProgressoPlano = (dataInicio?: string, dataFim?: string) => {
-    if (!dataInicio || !dataFim) return 0;
-    
-    const inicio = new Date(dataInicio);
-    const fim = new Date(dataFim);
-    const hoje = new Date();
-    
-    // Se o plano já expirou
-    if (hoje > fim) return 100;
-    
-    // Se o plano ainda não começou
-    if (hoje < inicio) return 0;
-    
-    // Calcular progresso
-    const diasTotais = Math.abs(differenceInDays(fim, inicio));
-    const diasPassados = Math.abs(differenceInDays(hoje, inicio));
-    
-    return Math.floor((diasPassados / diasTotais) * 100);
-  };
-
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Pagamentos</h1>
-        <p className="text-gray-500 dark:text-gray-400">Gerencie todos os pagamentos e transações.</p>
-      </div>
-      
-      {/* Cartões de resumo */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Recebido</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold dark:text-white">
-              {`R$ ${resumo.totalRecebido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-            </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Total</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500 dark:text-gray-400">Reembolsos</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold dark:text-white">
-              {`R$ ${resumo.reembolsos.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-            </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Total</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500 dark:text-gray-400">Transações</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold dark:text-white">{resumo.transacoes}</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Total</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500 dark:text-gray-400">Ticket Médio</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold dark:text-white">
-              {`R$ ${resumo.ticketMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-            </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Média</div>
-          </CardContent>
-        </Card>
-      </div>
-      
-      {/* Filtros */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Transações</CardTitle>
-          <CardDescription>Visualize e gerencie todas as transações realizadas.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
-              <Input 
-                placeholder="Buscar por ID, cliente, email ou plano" 
-                className="pl-8" 
-                value={filtro} 
-                onChange={(e) => setFiltro(e.target.value)}
-              />
-            </div>
-            <div className="flex flex-row flex-wrap gap-2">
-              <Select value={statusFiltro} onValueChange={setStatusFiltro}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos os status</SelectItem>
-                  <SelectItem value="aprovado">Aprovado</SelectItem>
-                  <SelectItem value="pendente">Pendente</SelectItem>
-                  <SelectItem value="reembolsado">Reembolsado</SelectItem>
-                  <SelectItem value="cancelado">Cancelado</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <Select value={metodoFiltro} onValueChange={setMetodoFiltro}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Método" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos os métodos</SelectItem>
-                  <SelectItem value="credito">Cartão de Crédito</SelectItem>
-                  <SelectItem value="debito">Cartão de Débito</SelectItem>
-                  <SelectItem value="pix">PIX</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <Select value={plataformaFiltro} onValueChange={setPlataformaFiltro}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Plataforma" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todas as plataformas</SelectItem>
-                  <SelectItem value="tappylink">Tappy Link</SelectItem>
-                  <SelectItem value="tappyespacos">Tappy Espaços</SelectItem>
-                  <SelectItem value="tappywhatsapp">Tappy WhatsApp</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <div className="flex flex-row gap-2">
-                <div className="relative">
-                  <Calendar className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
-                  <Input 
-                    type="date" 
-                    className="pl-8 w-[180px]" 
-                    placeholder="Data Início"
-                    value={dataInicio}
-                    onChange={(e) => setDataInicio(e.target.value)}
-                  />
-                </div>
-                <div className="relative">
-                  <Calendar className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
-                  <Input 
-                    type="date" 
-                    className="pl-8 w-[180px]" 
-                    placeholder="Data Fim"
-                    value={dataFim}
-                    onChange={(e) => setDataFim(e.target.value)}
-                  />
-                </div>
-              </div>
-              
-              <Button variant="outline" size="icon">
-                <Download className="h-4 w-4" />
-              </Button>
-            </div>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Pagamentos</h1>
+            <p className="text-gray-500 dark:text-gray-400 mt-1">
+              Visualize e gerencie todas as transações da sua conta Tappy
+            </p>
           </div>
-          
-          {/* Tabela de pagamentos */}
-          <div className="rounded-md border border-border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Cliente</TableHead>
-                  <TableHead>Plano</TableHead>
-                  <TableHead>Valor</TableHead>
-                  <TableHead>Método</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Plataforma</TableHead>
-                  <TableHead></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {carregando ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-10">
-                      <div className="flex flex-col items-center justify-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                        <div className="mt-2 text-sm text-gray-500">Carregando pagamentos...</div>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ) : pagamentosFiltrados.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-10">
-                      <div className="text-gray-500">Nenhum pagamento encontrado</div>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  pagamentosFiltrados.map((pagamento) => (
-                  <TableRow key={pagamento.id}>
-                    <TableCell>{pagamento.cliente}</TableCell>
-                    <TableCell>{pagamento.plano}</TableCell>
-                    <TableCell>{pagamento.valor}</TableCell>
-                    <TableCell>{pagamento.metodo}</TableCell>
-                    <TableCell>{renderStatus(pagamento.status)}</TableCell>
-                    <TableCell>{pagamento.data}</TableCell>
-                    <TableCell>{pagamento.plataforma || '-'}</TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onSelect={() => abrirDetalhes(pagamento)}>
-                            Ver detalhes
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            Enviar e-mail
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                )))
-                }
-              </TableBody>
-            </Table>
-          </div>
-          
-          {/* Paginação */}
-          <div className="flex items-center justify-end space-x-2 py-4">
-            <Button variant="outline" size="sm" disabled>
-              Anterior
-            </Button>
-            <Button variant="outline" size="sm">
-              Próximo
+          <div className="flex space-x-2 mt-4 md:mt-0">
+            <Select value={periodo} onValueChange={setPeriodo}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Selecione o período" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ultimo-mes">Último mês</SelectItem>
+                <SelectItem value="ultimos-3-meses">Últimos 3 meses</SelectItem>
+                <SelectItem value="ultimos-6-meses">Últimos 6 meses</SelectItem>
+                <SelectItem value="ultimo-ano">Último ano</SelectItem>
+                <SelectItem value="todos">Todo o período</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <Button variant="outline" className="gap-1">
+              <FileDown className="h-4 w-4" />
+              <span>Exportar</span>
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
       
-      {/* Modal de Detalhes do Pedido */}
-      <Dialog open={modalAberto} onOpenChange={setModalAberto}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Detalhes do Pedido</DialogTitle>
-            <DialogDescription>
-              Informações completas sobre o pedido e a assinatura.
-            </DialogDescription>
-          </DialogHeader>
-          
-          {pedidoSelecionado && (
-            <div className="space-y-6 py-4">
-              {/* Informações do cliente */}
-              <div className="space-y-2">
-                <h4 className="font-medium text-sm text-muted-foreground">Cliente</h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm font-semibold">{pedidoSelecionado.cliente}</p>
-                    <p className="text-sm text-muted-foreground">{pedidoSelecionado.email}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-semibold">ID da Transação</p>
-                    <p className="text-sm text-muted-foreground">{pedidoSelecionado.transactionId || 'N/A'}</p>
-                  </div>
+      {/* Cards de resumo com glassmorphism */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card className="overflow-hidden border-0 bg-gradient-to-br from-green-50/80 to-green-100/80 dark:from-green-900/20 dark:to-green-800/20 backdrop-blur-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                <DollarSign className="h-4 w-4 text-green-500" />
+                Total Recebido
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold dark:text-white">R$ 0,00</div>
+              <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <CalendarIcon className="h-3 w-3" />
+                Último mês
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+        
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+        >
+          <Card className="overflow-hidden border-0 bg-gradient-to-br from-red-50/80 to-red-100/80 dark:from-red-900/20 dark:to-red-800/20 backdrop-blur-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                <RefreshCcw className="h-4 w-4 text-red-500" />
+                Reembolsos
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold dark:text-white">R$ 0,00</div>
+              <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <CalendarIcon className="h-3 w-3" />
+                Último mês
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+        
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+        >
+          <Card className="overflow-hidden border-0 bg-gradient-to-br from-blue-50/80 to-blue-100/80 dark:from-blue-900/20 dark:to-blue-800/20 backdrop-blur-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                <FileText className="h-4 w-4 text-blue-500" />
+                Transações
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold dark:text-white">0</div>
+              <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <CalendarIcon className="h-3 w-3" />
+                Último mês
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+        
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.3 }}
+        >
+          <Card className="overflow-hidden border-0 bg-gradient-to-br from-purple-50/80 to-purple-100/80 dark:from-purple-900/20 dark:to-purple-800/20 backdrop-blur-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-purple-500" />
+                Ticket Médio
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold dark:text-white">R$ 0,00</div>
+              <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <CalendarIcon className="h-3 w-3" />
+                Último mês
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+      
+      {/* Seção dos pagamentos */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+      >
+        <Card className="border-0 shadow-lg">
+          <CardHeader className="pb-0">
+            <Tabs defaultValue="todos" value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                <TabsList className="bg-gray-100 dark:bg-gray-800 p-1">
+                  <TabsTrigger value="todos" className="text-xs">Todos</TabsTrigger>
+                  <TabsTrigger value="aprovados" className="text-xs">Aprovados</TabsTrigger>
+                  <TabsTrigger value="pendentes" className="text-xs">Pendentes</TabsTrigger>
+                  <TabsTrigger value="reembolsados" className="text-xs">Reembolsados</TabsTrigger>
+                </TabsList>
+                
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                  <Input 
+                    placeholder="Buscar por cliente, email, plano..." 
+                    className="w-full sm:w-[300px] pl-8" 
+                    value={filtro} 
+                    onChange={(e) => setFiltro(e.target.value)}
+                  />
                 </div>
               </div>
               
-              <div className="border-t pt-4">
-                <h4 className="font-medium text-sm text-muted-foreground mb-2">Informações do Plano</h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm font-semibold">Plano</p>
-                    <p className="text-sm text-muted-foreground">{pedidoSelecionado.plano}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold">Plataforma</p>
-                    <p className="text-sm text-muted-foreground">{pedidoSelecionado.plataforma}</p>
-                  </div>
-                </div>
-              </div>
+              <Separator className="mb-6" />
               
-              <div className="border-t pt-4">
-                <h4 className="font-medium text-sm text-muted-foreground mb-2">Informações de Pagamento</h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm font-semibold">Valor</p>
-                    <p className="text-sm text-muted-foreground">{pedidoSelecionado.valor}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold">Método</p>
-                    <p className="text-sm text-muted-foreground">{pedidoSelecionado.metodo}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold">Status</p>
-                    <div className="text-sm">{renderStatus(pedidoSelecionado.status)}</div>
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold">Data do Pagamento</p>
-                    <p className="text-sm text-muted-foreground">{pedidoSelecionado.data}</p>
-                  </div>
+              <TabsContent value="todos" className="m-0">
+                <div className="rounded-lg border border-gray-200 dark:border-gray-800">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-gray-50 dark:bg-gray-800/50">
+                        <TableHead className="w-[80px] font-medium">ID</TableHead>
+                        <TableHead className="font-medium">Cliente</TableHead>
+                        <TableHead className="font-medium">Plano</TableHead>
+                        <TableHead className="font-medium">Data</TableHead>
+                        <TableHead className="font-medium">Valor</TableHead>
+                        <TableHead className="font-medium">Método</TableHead>
+                        <TableHead className="font-medium">Status</TableHead>
+                        <TableHead className="font-medium w-[80px]">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {pagamentos.length > 0 ? (
+                        pagamentos.map((pagamento) => (
+                          <TableRow key={pagamento.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                            <TableCell className="font-medium">{pagamento.id}</TableCell>
+                            <TableCell>
+                              <div className="flex flex-col">
+                                <span className="font-medium">{pagamento.cliente}</span>
+                                <span className="text-xs text-muted-foreground">{pagamento.email}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell>{pagamento.plano}</TableCell>
+                            <TableCell>{pagamento.data}</TableCell>
+                            <TableCell className="font-medium">{pagamento.valor}</TableCell>
+                            <TableCell>{pagamento.metodo}</TableCell>
+                            <TableCell>{renderStatus(pagamento.status)}</TableCell>
+                            <TableCell>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-[200px]">
+                                  <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem className="gap-2 cursor-pointer">
+                                    <Eye className="h-4 w-4" />
+                                    <span>Ver detalhes</span>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="gap-2 cursor-pointer">
+                                    <FileText className="h-4 w-4" />
+                                    <span>Baixar recibo</span>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="gap-2 cursor-pointer">
+                                    <Mail className="h-4 w-4" />
+                                    <span>Enviar por email</span>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem className="gap-2 cursor-pointer text-red-600 focus:text-red-600">
+                                    <RefreshCcw className="h-4 w-4" />
+                                    <span>Solicitar reembolso</span>
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={8} className="h-[400px] text-center">
+                            <div className="flex flex-col items-center justify-center py-10">
+                              <div className="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+                                <Wallet className="h-10 w-10 text-gray-400" />
+                              </div>
+                              <h3 className="text-xl font-semibold mb-2">Nenhum pagamento encontrado</h3>
+                              <p className="text-gray-500 dark:text-gray-400 text-center max-w-md mb-6">
+                                Você ainda não registrou nenhum pagamento. 
+                                Quando você adquirir um plano ou realizar uma transação, 
+                                os detalhes aparecerão aqui.
+                              </p>
+                              <Button className="gap-2 bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600">
+                                <ShoppingCart className="h-4 w-4" />
+                                <span>Explorar planos disponíveis</span>
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
                 </div>
-              </div>
+              </TabsContent>
               
-              {/* Período de Assinatura com Barra de Progresso */}
-              {pedidoSelecionado.inicio && pedidoSelecionado.fim && (
-                <div className="border-t pt-4">
-                  <h4 className="font-medium text-sm text-muted-foreground mb-2">Período de Assinatura</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>{new Date(pedidoSelecionado.inicio).toLocaleDateString('pt-BR')}</span>
-                      <span>{new Date(pedidoSelecionado.fim).toLocaleDateString('pt-BR')}</span>
+              <TabsContent value="aprovados" className="m-0">
+                <div className="rounded-lg border border-gray-200 dark:border-gray-800">
+                  <div className="flex flex-col items-center justify-center py-10">
+                    <div className="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+                      <Check className="h-10 w-10 text-green-500" />
                     </div>
-                    <Progress value={calcularProgressoPlano(pedidoSelecionado.inicio, pedidoSelecionado.fim)} className="h-2" />
-                    <p className="text-xs text-center text-muted-foreground mt-1">
-                      Progresso da assinatura: {calcularProgressoPlano(pedidoSelecionado.inicio, pedidoSelecionado.fim)}%
+                    <h3 className="text-xl font-semibold mb-2">Nenhum pagamento aprovado</h3>
+                    <p className="text-gray-500 dark:text-gray-400 text-center max-w-md mb-6">
+                      Você ainda não possui pagamentos aprovados.
+                      Quando suas transações forem processadas com sucesso, 
+                      elas aparecerão nesta seção.
                     </p>
                   </div>
                 </div>
-              )}
+              </TabsContent>
               
-              {/* Link para recibo/comprovante se disponível */}
-              {pedidoSelecionado.receiptUrl && (
-                <div className="border-t pt-4">
-                  <Button variant="outline" className="w-full" asChild>
-                    <a href={pedidoSelecionado.receiptUrl} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className="mr-2 h-4 w-4" /> Ver Comprovante
-                    </a>
-                  </Button>
+              <TabsContent value="pendentes" className="m-0">
+                <div className="rounded-lg border border-gray-200 dark:border-gray-800">
+                  <div className="flex flex-col items-center justify-center py-10">
+                    <div className="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+                      <Clock className="h-10 w-10 text-amber-500" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">Nenhum pagamento pendente</h3>
+                    <p className="text-gray-500 dark:text-gray-400 text-center max-w-md mb-6">
+                      Não há pagamentos aguardando aprovação no momento.
+                      Quando você iniciar uma nova transação, ela aparecerá 
+                      aqui até ser processada.
+                    </p>
+                  </div>
                 </div>
-              )}
-            </div>
-          )}
+              </TabsContent>
+              
+              <TabsContent value="reembolsados" className="m-0">
+                <div className="rounded-lg border border-gray-200 dark:border-gray-800">
+                  <div className="flex flex-col items-center justify-center py-10">
+                    <div className="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+                      <RefreshCcw className="h-10 w-10 text-red-500" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">Nenhum reembolso encontrado</h3>
+                    <p className="text-gray-500 dark:text-gray-400 text-center max-w-md mb-6">
+                      Você não possui nenhum reembolso registrado.
+                      Se precisar solicitar algum reembolso, entre em contato
+                      com nosso suporte.
+                    </p>
+                    <Button variant="outline" className="gap-2">
+                      <AlertCircle className="h-4 w-4" />
+                      <span>Fale com o suporte</span>
+                    </Button>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </CardHeader>
           
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setModalAberto(false)}>
-              Fechar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          <CardFooter className="flex items-center justify-between pt-2 pb-6 px-6">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              Mostrando 0 de 0 resultados
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" disabled>
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Anterior
+              </Button>
+              <Button variant="outline" size="sm" disabled>
+                Próximo
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+          </CardFooter>
+        </Card>
+      </motion.div>
+      
+      {/* Dicas e recursos úteis */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.6 }}
+      >
+        <Card className="bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-900/20 dark:to-indigo-900/20 border-0 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <BarChart4 className="h-5 w-5 text-blue-500" />
+              Dicas e recursos
+            </CardTitle>
+            <CardDescription>
+              Aprenda a gerenciar suas finanças e optimize sua experiência na Tappy
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card className="bg-white/70 dark:bg-gray-800/50 backdrop-blur-sm border-0">
+              <CardHeader className="py-4 px-4">
+                <CardTitle className="text-sm">Relatório financeiro</CardTitle>
+              </CardHeader>
+              <CardContent className="py-2 px-4">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Acompanhe seus gastos e visualize análises detalhadas do seu histórico financeiro.
+                </p>
+              </CardContent>
+              <CardFooter className="py-3 px-4">
+                <Button variant="ghost" size="sm" className="w-full justify-start gap-1 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 p-0">
+                  <ChevronRight className="h-4 w-4" />
+                  <span className="text-xs">Ver relatórios</span>
+                </Button>
+              </CardFooter>
+            </Card>
+            
+            <Card className="bg-white/70 dark:bg-gray-800/50 backdrop-blur-sm border-0">
+              <CardHeader className="py-4 px-4">
+                <CardTitle className="text-sm">Métodos de pagamento</CardTitle>
+              </CardHeader>
+              <CardContent className="py-2 px-4">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Gerencie seus cartões e métodos de pagamento para facilitar futuras transações.
+                </p>
+              </CardContent>
+              <CardFooter className="py-3 px-4">
+                <Button variant="ghost" size="sm" className="w-full justify-start gap-1 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 p-0">
+                  <ChevronRight className="h-4 w-4" />
+                  <span className="text-xs">Gerenciar métodos</span>
+                </Button>
+              </CardFooter>
+            </Card>
+            
+            <Card className="bg-white/70 dark:bg-gray-800/50 backdrop-blur-sm border-0">
+              <CardHeader className="py-4 px-4">
+                <CardTitle className="text-sm">Faturas e recibos</CardTitle>
+              </CardHeader>
+              <CardContent className="py-2 px-4">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Acesse, baixe e compartilhe suas faturas e recibos fiscais a qualquer momento.
+                </p>
+              </CardContent>
+              <CardFooter className="py-3 px-4">
+                <Button variant="ghost" size="sm" className="w-full justify-start gap-1 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 p-0">
+                  <ChevronRight className="h-4 w-4" />
+                  <span className="text-xs">Ver documentos</span>
+                </Button>
+              </CardFooter>
+            </Card>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
+}
+
+function ChevronLeft(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m15 18-6-6 6-6" />
+    </svg>
+  )
+}
+
+function ChevronRight(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m9 18 6-6-6-6" />
+    </svg>
+  )
 }

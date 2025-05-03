@@ -83,7 +83,7 @@ export function TappyWhatsSection() {
         className="absolute bottom-0 left-0 w-96 h-96 rounded-full bg-tappyBlue/10 blur-3xl" 
       />
       
-      <div className="container relative z-10">
+      <div className="container max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-20 items-center">
           <motion.div 
             variants={{

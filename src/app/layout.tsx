@@ -3,6 +3,8 @@ import { Inter, Poppins } from "next/font/google";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { Providers } from "./providers";
 import "./globals.css";
+import { FloatingChat } from "@/components/global/floating-chat";
+import { CookieConsent } from "@/components/global/cookie-consent";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -18,8 +20,8 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Tappy | Tecnologia Inteligente para Transformar Conexões",
-  description: "Tappy oferece um ecossistema exclusivo de soluções digitais que transformam a maneira como interagimos no mundo corporativo. Integre Tappy Link, Tappy Whats e Tappy Imob para revolucionar seu negócio com inovação e elegância.",
-  keywords: ["Tappy", "Tappy Link", "Tappy Whats", "Tappy Imob", "CRM", "Imobiliária", "WhatsApp", "Cartão Virtual", "Networking", "Cartão Digital", "Identidade Digital", "Automação", "Marketing Digital", "Conexões Profissionais"],
+  description: "Tappy oferece um ecossistema exclusivo de soluções digitais que transformam a maneira como interagimos no mundo corporativo. Integre Tappy ID, Tappy Whats e Tappy Imob para revolucionar seu negócio com inovação e elegância.",
+  keywords: ["Tappy", "Tappy ID", "Tappy Whats", "Tappy Imob", "CRM", "Imobiliária", "WhatsApp", "Cartão Virtual", "Networking", "Cartão Digital", "Identidade Digital", "Automação", "Marketing Digital", "Conexões Profissionais"],
   authors: [{ name: "Tappy" }],
   creator: "Tappy",
   publisher: "Tappy Technologies",
@@ -76,6 +78,9 @@ export default function RootLayout({
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
             <div className="relative flex min-h-screen flex-col">
               {children}
+              {/* Componentes globais */}
+              <FloatingChat />
+              <CookieConsent />
             </div>
           </ThemeProvider>
         </Providers>

@@ -122,11 +122,13 @@ export async function createPlan(data: PlanFormValues) {
     const newPlan = await prisma.plan.create({
       data: planData
     });
-
-    revalidatePath('/dashboard/planos');
+    
+    // Não usamos revalidatePath para evitar problemas com a sessão
+    // O cliente fará a atualização da UI
     
     return {
       plan: newPlan,
+      success: true,
       error: null
     };
   } catch (error) {
@@ -160,10 +162,12 @@ export async function updatePlan(id: string, data: PlanFormValues) {
       data: planData
     });
 
-    revalidatePath('/dashboard/planos');
+    // Não usamos revalidatePath para evitar problemas com a sessão
+    // O cliente fará a atualização da UI
     
     return {
       plan: updatedPlan,
+      success: true,
       error: null
     };
   } catch (error) {
@@ -186,22 +190,41 @@ export async function updatePlan(id: string, data: PlanFormValues) {
  */
 export async function deletePlan(id: string) {
   try {
-    // Apenas registra no log quantos assinantes estão usando o plano (para informação)
-    const subscribersCount = await prisma.subscriber.count({
+    // Em vez de verificar subscribers, verificamos se existem assinaturas relacionadas
+    // usando a tabela subscriptions que existe no schema
+    const subscriptionsCount = await prisma.subscriptions.count({
       where: { planId: id }
     });
     
-    if (subscribersCount > 0) {
-      console.log(`Excluindo plano com ${subscribersCount} assinantes ativos. Os assinantes precisarão ser migrados.`);
+    if (subscriptionsCount > 0) {
+      return {
+        success: false,
+        error: `Este plano não pode ser excluído porque existem ${subscriptionsCount} assinaturas ativas.`
+      };
     }
     
-    await prisma.plan.delete({
-      where: { id },
-      // Força a exclusão, ignorando restrições de chave estrangeira
-      // ATENÇÃO: Isso pode causar problemas com assinantes que usam esse plano
+    console.log(`Excluindo plano com ID: ${id}`);
+
+    // Verificar se o plano existe antes de tentar excluir
+    const planExists = await prisma.plan.findUnique({
+      where: { id }
     });
 
-    revalidatePath('/dashboard/planos');
+    if (!planExists) {
+      return {
+        success: false,
+        error: 'Plano não encontrado.'
+      };
+    }
+    
+    // Tentar excluir o plano
+    await prisma.plan.delete({
+      where: { id }
+    });
+
+    console.log(`Plano com ID ${id} excluído com sucesso.`);
+    // Não usamos revalidatePath para evitar problemas com a sessão
+    // O cliente fará a atualização da UI
     
     return {
       success: true,
@@ -211,7 +234,7 @@ export async function deletePlan(id: string) {
     console.error(`Erro ao excluir o plano ${id}:`, error);
     return {
       success: false,
-      error: 'Falha ao excluir o plano. Por favor, tente novamente.'
+      error: `Falha ao excluir o plano: ${error instanceof Error ? error.message : 'Erro desconhecido'}`
     };
   }
 }

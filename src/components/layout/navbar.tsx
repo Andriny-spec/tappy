@@ -40,29 +40,32 @@ const navItems: NavItem[] = [
     isDropdown: true,
     subItems: [
       {
-        title: "Tappy ID",
-        href: "#tappy-id",
-        description: "Seu cartão virtual em um só lugar",
-        icon: CreditCard
-      },
-      {
-        title: "Tappy Whats",
-        href: "#tappy-whats",
-        description: "CRM completo para WhatsApp",
-        icon: MessageSquare
-      },
-      {
         title: "Tappy Imob",
-        href: "#tappy-imob",
+        href: "https://imob.tappy.id/",
         description: "CRM imobiliário com I.A.",
         isNew: true,
         icon: Home
+      },  
+      {
+        title: "Tappy Whats",
+        href: "https://whats.tappy.id/",
+        description: "CRM completo para WhatsApp",
+        isNew: true,
+
+        icon: MessageSquare
       },
+      {
+        title: "Tappy Link",
+        href: "https://link.tappy.id/",
+        description: "Seu cartão virtual em um só lugar",
+        icon: CreditCard
+      },
+     
     ],
   },
   {
     title: "Quem Somos",
-    href: "#quem-somos",
+    href: "/sobre",
     description: "Conheça nossa história",
   },
 
@@ -156,14 +159,14 @@ export function Navbar() {
                           className="group flex items-center gap-4 py-4 px-5 hover:bg-muted/50 cursor-pointer transition-all duration-200 relative overflow-hidden text-left"
                         >
                           <div className="flex-shrink-0">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-tappyGreen/10 to-tappyGreen/20 flex items-center justify-center text-tappyGreen group-hover:scale-110 transition-transform duration-200">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-tappyGreen/20 to-tappyGreen/40 flex items-center justify-center text-[#25D366] group-hover:scale-110 transition-transform duration-200">
                               {subItem.icon && <subItem.icon className="h-5 w-5" />}
                             </div>
                           </div>
                           
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className="font-medium text-base group-hover:text-tappyGreen transition-colors duration-200">{subItem.title}</span>
+                              <span className="font-medium text-base group-hover:text-[#25D366] transition-colors duration-200">{subItem.title}</span>
                               {subItem.isNew && (
                                 <span className="px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-gradient-to-r from-tappyGreen/20 to-tappyBlue/20 text-tappyGreen border border-tappyGreen/20 animate-pulse">
                                   NOVO
@@ -174,7 +177,7 @@ export function Navbar() {
                           </div>
                           
                           <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pr-1">
-                            <ArrowRight className="h-4 w-4 text-tappyGreen" />
+                            <ArrowRight className="h-4 w-4 text-[#25D366]" />
                           </div>
                         </Link>
                       </DropdownMenuItem>
@@ -206,8 +209,11 @@ export function Navbar() {
             <Button asChild variant="outline" size="sm" className="border-tappyGreen/30 hover:border-tappyGreen hover:bg-tappyGreen/5 transition-all duration-300">
               <Link href="/suporte">Atendimento</Link>
             </Button>
-            <Button asChild variant="gradient" size="sm" className="shadow-md shadow-tappyGreen/20 hover:shadow-tappyGreen/30 transition-all duration-300">
-              <Link href="#tappy-id">Saiba mais</Link>
+            <Button asChild variant="gradient" size="sm" className="shadow-md shadow-tappyGreen/20 hover:shadow-tappyGreen/40 hover:shadow-lg transition-all duration-500 font-medium relative overflow-hidden group">
+              <Link href="#tappy-id" className="relative z-10 flex items-center gap-1">
+                <span className="relative group-hover:translate-x-1 transition-transform duration-300">Planos e Preços</span>
+                <span className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">→</span>
+              </Link>
             </Button>
           </div>
           
@@ -273,7 +279,7 @@ export function Navbar() {
                                     onClick={() => setIsOpen(false)}
                                   >
                                     <div className="flex-shrink-0">
-                                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-tappyGreen/10 to-tappyGreen/20 flex items-center justify-center text-tappyGreen group-hover:scale-110 transition-transform duration-200">
+                                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-tappyGreen/20 to-tappyGreen/40 flex items-center justify-center text-[#25D366] group-hover:scale-110 transition-transform duration-200">
                                         {subItem.icon && <subItem.icon className="h-4 w-4" />}
                                       </div>
                                     </div>

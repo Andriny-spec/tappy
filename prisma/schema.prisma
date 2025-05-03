@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  binaryTargets = ["native", "windows"]
 }
 
 datasource db {
@@ -8,13 +9,14 @@ datasource db {
 }
 
 model Admin {
-  id        String   @id @default(cuid())
+  id        String     @id @default(cuid())
   name      String
-  email     String   @unique
+  email     String     @unique
   password  String
-  rules     String[] @default(["admin"])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  rules     String[]   @default(["admin"])
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  posts     BlogPost[]
 }
 
 model Account {
@@ -87,6 +89,7 @@ model Plan {
   features            String[]
   price               Float
   interval            String
+  checkoutLink        String?      // Link do checkout do Kirvano
   isActive            Boolean      @default(true)
   isHighlighted       Boolean      @default(false)
   createdAt           DateTime     @default(now())
@@ -112,7 +115,6 @@ model Plan {
   maxUsers            Int?
   setupFee            Float?
   shortDescription    String?
-  checkoutLink        String?
   payments            Payment[]
   platform            Platform     @relation(fields: [platformId], references: [id], onDelete: Cascade)
   subscribers         Subscriber[]
@@ -221,95 +223,46 @@ model SiteConfig {
   updatedAt      DateTime @updatedAt
 }
 
-model orders {
-  id              String         @id
-  userId          String
-  planId          String
-  subscriptionId  String?
-  amount          Decimal        @db.Decimal(10, 2)
-  paymentMethod   PaymentMethod?
-  paymentStatus   PaymentStatus  @default(PENDENTE)
-  paymentIntentId String?
-  paymentDate     DateTime?
-  transactionId   String?
-  receiptUrl      String?
-  notes           String?
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime
-  plans           plans          @relation(fields: [planId], references: [id])
-  subscriptions   subscriptions? @relation(fields: [subscriptionId], references: [id])
-  users           users          @relation(fields: [userId], references: [id], onDelete: Cascade)
+model BlogPost {
+  id          String        @id @default(cuid())
+  title       String
+  slug        String        @unique
+  excerpt     String?
+  content     String
+  coverImage  String?
+  publishedAt DateTime?
+  seoScore    Int           @default(0)
+  status      String        @default("DRAFT") // Valores possíveis: "PUBLISHED", "DRAFT", "ARCHIVED"
+  authorId    String
+  categoryId  String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  author      Admin         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  category    BlogCategory? @relation(fields: [categoryId], references: [id])
+  tags        BlogTag[]     @relation("PostToTag")
+  views       Int           @default(0)
+  shares      Int           @default(0)
 }
 
-model plans {
-  id            String          @id
-  name          String
-  description   String
-  price         Decimal         @db.Decimal(10, 2)
-  discountPrice Decimal?        @db.Decimal(10, 2)
-  durationDays  Int
-  features      String[]
-  isPopular     Boolean         @default(false)
-  isActive      Boolean         @default(true)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime
-  orders        orders[]
-  subscriptions subscriptions[]
+model BlogCategory {
+  id          String     @id @default(cuid())
+  name        String
+  slug        String     @unique
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  posts       BlogPost[]
 }
 
-model profiles {
-  id        String   @id
-  userId    String   @unique
-  name      String
-  biography String?
-  phone     String?
-  address   String?
-  city      String?
-  state     String?
-  facebook  String?
-  linkedin  String?
-  instagram String?
-  whatsapp  String?
-  telegram  String?
-  tiktok    String?
-  photo     String?
-  qrCodeId  String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime
-  views     Int      @default(0)
-  shares    Int      @default(0)
-  clicks    Int      @default(0)
-  users     users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+model BlogTag {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  slug      String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  posts     BlogPost[] @relation("PostToTag")
 }
 
-model subscriptions {
-  id          String             @id
-  userId      String
-  planId      String
-  status      SubscriptionStatus @default(PENDENTE)
-  startDate   DateTime?
-  endDate     DateTime?
-  canceledAt  DateTime?
-  autoRenew   Boolean            @default(true)
-  lastOrderId String?
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime
-  orders      orders[]
-  plans       plans              @relation(fields: [planId], references: [id])
-  users       users              @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model users {
-  id            String          @id
-  email         String          @unique
-  password      String
-  role          Role            @default(ASSINANTE)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime
-  orders        orders[]
-  profiles      profiles?
-  subscriptions subscriptions[]
-}
 
 enum PaymentMethod {
   PIX

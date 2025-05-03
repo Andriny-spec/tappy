@@ -81,6 +81,40 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 dias em segundos
+  },
+  jwt: {
+    maxAge: 30 * 24 * 60 * 60, // 30 dias em segundos
+  },
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 30 * 24 * 60 * 60 // 30 dias em segundos
+      }
+    },
+    callbackUrl: {
+      name: `next-auth.callback-url`,
+      options: {
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 30 * 24 * 60 * 60
+      }
+    },
+    csrfToken: {
+      name: "next-auth.csrf-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production"
+      }
+    }
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -93,7 +127,7 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id as string;
+        (session.user as any).id = token.id as string;
         (session.user as any).isAdmin = token.isAdmin as boolean;
         (session.user as any).rules = token.rules as string[];
       }
@@ -102,7 +136,7 @@ export const authOptions: NextAuthOptions = {
     async redirect({ url, baseUrl }) {
       // Redireciona para dashboard após o login
       if (url.startsWith("/api/auth") || url === "/login" || url === baseUrl) {
-        return `${baseUrl}/dashboard/`;
+        return `${baseUrl}/dashboard`;
       }
       // Se a URL já for uma URL válida, retorne-a
       if (url.startsWith("http")) {

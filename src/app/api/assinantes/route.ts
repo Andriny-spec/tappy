@@ -106,3 +106,45 @@ export async function GET() {
     );
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    // Verificar autenticação
+    const session = await getServerSession(authOptions);
+    
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Não autorizado' },
+        { status: 401 }
+      );
+    }
+
+    // Get id from URL
+    const url = new URL(request.url);
+    const id = url.searchParams.get('id');
+    
+    if (!id) {
+      return NextResponse.json(
+        { error: 'ID do assinante é obrigatório' },
+        { status: 400 }
+      );
+    }
+
+    // Excluir assinante
+    await prisma.subscriber.delete({
+      where: { id }
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Assinante excluído com sucesso'
+    });
+    
+  } catch (error) {
+    console.error('Erro ao excluir assinante:', error);
+    return NextResponse.json(
+      { error: 'Erro ao excluir assinante' },
+      { status: 500 }
+    );
+  }
+}

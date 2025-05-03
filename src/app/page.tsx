@@ -13,10 +13,10 @@ export default function Home() {
     <>
       <Navbar />
       
-      <main>
+      <main className="w-full">
         <HeroSection />
-        <TappyIdSection />
         <TappyWhatsSection />
+        <TappyIdSection />
         <TappyImobSection />
         
         {/* Seção de Contato */}
@@ -26,8 +26,7 @@ export default function Home() {
             <div className="absolute inset-0 bg-grid-pattern opacity-[0.025]" />
             <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background to-transparent" />
           </div>
-
-          <div className="container max-w-screen-2xl relative z-10">
+          <div className="container max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="text-center mb-16">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}

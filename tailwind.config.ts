@@ -24,6 +24,8 @@ const config = {
         tappyGreen: {
           DEFAULT: "#17d300",
           hover: "#15bb00",
+          dark: "#0daa00",
+          foreground: "#ffffff",
         },
         tappyBlue: "#0070f3",
         tappyPurple: "#7928ca",

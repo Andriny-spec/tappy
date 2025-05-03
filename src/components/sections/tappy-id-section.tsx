@@ -14,7 +14,7 @@ export function TappyIdSection() {
       {/* Background accent */}
       <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-tappyGreen/10 blur-3xl" />
       
-      <div className="container relative z-10">
+      <div className="container max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-20 items-center">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -23,44 +23,118 @@ export function TappyIdSection() {
             transition={{ duration: 0.5 }}
             className="order-2 md:order-1"
           >
-            <div className="w-full max-w-md mx-auto">
-              <FloatingCard className="aspect-[4/6] w-full max-w-sm mx-auto">
-                <div className="w-full h-full p-6 flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 to-black text-white">
-                  <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-tappyGreen/20 to-transparent" />
+            <div className="w-full max-w-2xl mx-auto">
+              <FloatingCard className="aspect-[16/9] w-full max-w-2xl mx-auto shadow-2xl">
+                <div className="w-full h-full p-6 flex flex-col relative bg-gradient-to-br from-gray-900 via-[#121212] to-black text-white rounded-2xl overflow-hidden">
+                  {/* Efeitos de background */}
+                  <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-tappyGreen/30 to-transparent" />
+                  <div className="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-tappyGreen/10 blur-3xl" />
+                  <div className="absolute -bottom-32 -left-20 w-64 h-64 rounded-full bg-blue-500/10 blur-3xl" />
                   
-                  <div className="text-center space-y-6 z-10">
-                    <h3 className="text-2xl font-bold gradient-text">Tappy ID</h3>
-                    <div className="w-16 h-16 mx-auto rounded-full bg-tappyGreen/20 flex items-center justify-center mb-2">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="w-8 h-8 text-tappyGreen"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"
-                        />
-                      </svg>
+                  {/* Padrão de linhas */}
+                  <div className="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:16px_16px]"></div>
+                  
+                  <div className="relative z-10 flex justify-between items-start h-full">
+                    {/* Coluna esquerda */}
+                    <div className="flex flex-col justify-between h-full max-w-[60%]">
+                      {/* Cabeçalho */}
+                      <div>
+                        <div className="flex items-center gap-3 mb-6">
+                          <div className="w-12 h-12 rounded-full bg-tappyGreen/20 flex items-center justify-center">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              strokeWidth={1.5}
+                              stroke="currentColor"
+                              className="w-6 h-6 text-tappyGreen"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"
+                              />
+                            </svg>
+                          </div>
+                          <div className="text-left">
+                            <h3 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-tappyGreen to-tappyGreen/70">Tappy ID</h3>
+                            <p className="text-xs text-white/50">Seu cartão virtual inteligente</p>
+                          </div>
+                        </div>
+                      
+                        {/* Informações do usuário */}
+                        <div className="text-left mb-8">
+                          <p className="text-2xl font-bold mb-1">João Silva</p>
+                          <p className="text-white/70 text-sm">CEO & Fundador</p>
+                          <p className="text-white/60 text-sm">Tappy Technologies</p>
+                        </div>
+                      </div>
+                      
+                      {/* Informações de contato */}
+                      <div className="grid grid-cols-2 gap-2 text-left text-sm">
+                        <div>
+                          <p className="text-white/50 text-xs mb-1">Email</p>
+                          <p className="text-white/90">joao@tappy.id</p>
+                        </div>
+                        <div>
+                          <p className="text-white/50 text-xs mb-1">Telefone</p>
+                          <p className="text-white/90">+55 11 99999-9999</p>
+                        </div>
+                        <div>
+                          <p className="text-white/50 text-xs mb-1">Website</p>
+                          <p className="text-white/90">tappy.id</p>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {/* Ícone NFC */}
+                          <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-tappyGreen">
+                              <path d="M6 8.32a7.43 7.43 0 0 1 0 7.36"/>
+                              <path d="M9.46 6.21a11.76 11.76 0 0 1 0 11.58"/>
+                              <path d="M12.91 4.1a15.91 15.91 0 0 1 .01 15.8"/>
+                              <path d="M16.37 2a20.16 20.16 0 0 1 0 20"/>
+                            </svg>
+                          </div>
+                          <span className="text-xs text-white/60">Aproxime para conectar</span>
+                        </div>
+                      </div>
                     </div>
                     
-                    <div className="space-y-2 mb-8">
-                      <p className="text-white/70">Seu cartão virtual</p>
-                      <p className="text-white/70">João Silva</p>
-                      <p className="text-white/70">joao@email.com</p>
-                    </div>
-                    
-                    <div className="w-full border border-white/20 rounded-md p-3 text-left">
-                      <p className="text-white/70 text-sm">Conecte-se:</p>
-                      <div className="flex items-center justify-between mt-2">
-                        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                    {/* Coluna direita (QR Code e redes sociais) */}
+                    <div className="flex flex-col items-end justify-between h-full">
+                      {/* QR Code */}
+                      <div className="bg-white p-2 rounded-lg mb-4">
+                        <div className="w-24 h-24 bg-[url('/qr-code-tappy.svg')] bg-contain">
+                          {/* Simulação de QR code usando CSS grid */}
+                          <div className="w-full h-full grid grid-cols-7 grid-rows-7 gap-0.5">
+                            {Array(49).fill(0).map((_, i) => {
+                              // Padrão de QR code simulado
+                              const isCorner = 
+                                (i < 7) || // Primeira linha
+                                (i > 41) || // Última linha
+                                (i % 7 === 0) || // Primeira coluna
+                                (i % 7 === 6); // Última coluna
+                              
+                              const isFixed = 
+                                [0,1,2,5,6,7,8,13,14,35,36,41,42,43,44,47,48].includes(i);
+                                
+                              return (
+                                <div 
+                                  key={i} 
+                                  className={`${isFixed ? 'bg-black' : (Math.random() > 0.6 ? 'bg-black' : 'bg-transparent')}`}
+                                />
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Redes sociais */}
+                      <div className="flex gap-2">
+                        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-tappyGreen/20 transition-colors">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
+                            width="16"
+                            height="16"
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="currentColor"
@@ -72,11 +146,11 @@ export function TappyIdSection() {
                             <circle cx="4" cy="4" r="2"></circle>
                           </svg>
                         </div>
-                        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-tappyGreen/20 transition-colors">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
+                            width="16"
+                            height="16"
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="currentColor"
@@ -86,11 +160,25 @@ export function TappyIdSection() {
                             <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
                           </svg>
                         </div>
-                        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-tappyGreen/20 transition-colors">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            className="text-white/70"
+                          >
+                            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                          </svg>
+                        </div>
+                        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-tappyGreen/20 transition-colors">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="currentColor"
@@ -102,26 +190,9 @@ export function TappyIdSection() {
                             <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
                           </svg>
                         </div>
-                        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            className="text-white/70"
-                          >
-                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                          </svg>
-                        </div>
                       </div>
                     </div>
                   </div>
-                  
-                  <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-tappyBlue/20 to-transparent" />
                 </div>
               </FloatingCard>
             </div>
@@ -150,8 +221,8 @@ export function TappyIdSection() {
                   <span>Mais popular</span>
                 </Badge>
                 <h2 className="text-3xl md:text-5xl font-bold font-poppins tracking-tight">
-                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-tappyGreen to-tappyBlue">Tappy ID</span>
-                  <span className="block text-foreground">Seu cartão virtual inteligente</span>
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-tappyGreen to-tappyBlue">Tappy Link Virtual</span>
+                  <span className="block text-foreground">Seu cartão  inteligente</span>
                 </h2>
               </div>
             </div>
@@ -182,27 +253,7 @@ export function TappyIdSection() {
                 </CardContent>
               </Card>
               
-              <Card className="bg-background/50 border-border/50">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Múltiplas Redes</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">
-                    Integre todas as suas redes sociais e canais de contato em um único lugar.
-                  </p>
-                </CardContent>
-              </Card>
-              
-              <Card className="bg-background/50 border-border/50">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Análise de Desempenho</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">
-                    Acompanhe quantas pessoas visualizaram e salvaram seu cartão.
-                  </p>
-                </CardContent>
-              </Card>
+            
             </div>
             
            

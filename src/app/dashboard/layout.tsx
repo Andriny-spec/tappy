@@ -5,14 +5,45 @@ import { redirect } from 'next/navigation';
 import { Sidebar } from '@/components/dashboard/layout/sidebar';
 import { Topbar } from '@/components/dashboard/layout/topbar';
 import { Toaster } from 'sonner';
+import { SidebarProvider } from '@/contexts/sidebar-context';
+import { useEffect } from 'react';
+import { SessionStorage } from '@/lib/session-storage';
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { status } = useSession();
-
+  const { data: session, status } = useSession();
+  
+  // Gerenciar persistência da sessão
+  useEffect(() => {
+    // Se estiver autenticado, salvar o token e atualizar atividade
+    if (status === 'authenticated' && session) {
+      // @ts-ignore - o token existe mas não está no tipo
+      const token = session?.token || '';
+      if (token) SessionStorage.saveSession(token);
+      
+      // Configurar um intervalo para atualizar a atividade a cada 5 minutos
+      const interval = setInterval(() => {
+        SessionStorage.updateActivity();
+      }, 5 * 60 * 1000);
+      
+      // Atualizar a atividade em cada interação do usuário
+      const updateOnActivity = () => SessionStorage.updateActivity();
+      document.addEventListener('click', updateOnActivity);
+      document.addEventListener('keypress', updateOnActivity);
+      document.addEventListener('scroll', updateOnActivity);
+      
+      return () => {
+        clearInterval(interval);
+        document.removeEventListener('click', updateOnActivity);
+        document.removeEventListener('keypress', updateOnActivity);
+        document.removeEventListener('scroll', updateOnActivity);
+      };
+    }
+  }, [status, session]);
+  
   // Proteger as rotas do dashboard, redirecionando para login se não estiver autenticado
   if (status === 'unauthenticated') {
     redirect('/login');
@@ -29,23 +60,25 @@ export default function DashboardLayout({
 
   // Se estiver autenticado, mostrar o layout do dashboard
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-background">
-      {/* Sidebar (barra lateral esquerda) */}
-      <Sidebar />
-      
-      {/* Conteúdo principal */}
-      <div className="flex flex-col flex-1 overflow-hidden">
-        {/* Topbar (barra superior) */}
-        <Topbar />
+    <SidebarProvider>
+      <div className="flex h-screen w-full overflow-hidden bg-background">
+        {/* Sidebar (barra lateral esquerda) */}
+        <Sidebar />
         
-        {/* Conteúdo da página */}
-        <main className="flex-1 overflow-y-auto bg-muted/20 dark:bg-background p-6">
-          {children}
-        </main>
+        {/* Conteúdo principal */}
+        <div className="flex flex-col flex-1 overflow-hidden">
+          {/* Topbar (barra superior) */}
+          <Topbar />
+          
+          {/* Conteúdo da página */}
+          <main className="flex-1 overflow-y-auto bg-muted/20 dark:bg-background p-6">
+            {children}
+          </main>
+        </div>
+        
+        {/* Toaster para notificações */}
+        <Toaster position="top-right" richColors theme="system" />
       </div>
-      
-      {/* Toaster para notificações */}
-      <Toaster position="top-right" richColors theme="system" />
-    </div>
+    </SidebarProvider>
   );
 }

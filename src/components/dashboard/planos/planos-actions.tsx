@@ -23,7 +23,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { PlusCircle, Loader2, AlertCircle } from 'lucide-react';
+import { PlusCircle, Loader2, AlertCircle, Sparkles, Lightbulb, Rocket } from 'lucide-react';
 import { createPlan } from '@/lib/actions/plan';
 import { getAllPlatforms } from '@/lib/actions/platform';
 
@@ -35,39 +35,62 @@ export default function PlanosActions() {
   const [formError, setFormError] = useState<string | null>(null);
   const [platforms, setPlatforms] = useState<Array<{ id: string, name: string, slug: string }>>([]);
   const [isLoadingPlatforms, setIsLoadingPlatforms] = useState(false);
+  const [isGenerating, setIsGenerating] = useState<{description?: boolean, features?: boolean, benefits?: boolean}>({});
   
   // Estado do formulário com valores padrão
   const [formValues, setFormValues] = useState({
     name: '',
     description: '',
+    shortDescription: '',
     platformId: '', // Será definido após carregar as plataformas
     price: 0,
-    interval: 'monthly', // Valor padrão
+    interval: 'mês', // Valor padrão
     features: [''],
+    benefits: [''],
     checkoutLink: '',
     isActive: true,
+    isHighlighted: false,
+    isFeatured: false,
+    displayOrder: 0,
+    hasAI: false,
+    hasClientPortal: false,
+    hasLeadManagement: false,
+    hasMultiChannel: false,
+    hasRentalManagement: false,
+    hasReports: false,
+    hasSocialMedia: false,
+    hasWebsite: false,
+    hasScheduling: false,
+    setupFee: 0,
+    hasSalesTools: false,
+    hasTeamManagement: false,
+    isUnlimited: false,
+    maxUsers: 1
   });
 
-  // Carrega as plataformas do banco de dados
+  // Carregar as plataformas quando o componente montar
   useEffect(() => {
     const loadPlatforms = async () => {
       try {
         setIsLoadingPlatforms(true);
-        const { platforms, error } = await getAllPlatforms();
+        const { platforms: fetchedPlatforms, error } = await getAllPlatforms();
         
         if (error) {
-          setFormError("Erro ao carregar plataformas: " + error);
-        } else if (platforms && platforms.length > 0) {
-          setPlatforms(platforms);
-          // Define a primeira plataforma como padrão
+          console.error('Erro ao carregar plataformas:', error);
+          return;
+        }
+        
+        setPlatforms(fetchedPlatforms);
+        
+        // Define o platformId inicial para a primeira plataforma, se disponível
+        if (fetchedPlatforms.length > 0) {
           setFormValues(prev => ({
             ...prev,
-            platformId: platforms[0].id
+            platformId: fetchedPlatforms[0].id
           }));
         }
-      } catch (error) {
-        console.error("Erro ao carregar plataformas:", error);
-        setFormError("Erro ao carregar plataformas. Tente novamente.");
+      } catch (err) {
+        console.error('Erro ao carregar plataformas:', err);
       } finally {
         setIsLoadingPlatforms(false);
       }
@@ -79,13 +102,54 @@ export default function PlanosActions() {
   const handleTabChange = (value: string) => {
     setTab(value);
   };
+  
+  // Função para gerar conteúdo com IA (DeepSeek)
+  const generateWithDeepseek = async (type: 'descrição' | 'recursos' | 'benefícios') => {
+    if (!formValues.name) {
+      setFormError('Digite o nome do plano para gerar conteúdo');
+      return;
+    }
+
+    try {
+      // Atualizar estado para mostrar o indicador de carregamento
+      setIsGenerating(prev => ({ ...prev, [type === 'descrição' ? 'description' : type === 'recursos' ? 'features' : 'benefits']: true }));
+      
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: formValues.name,
+          type: type,
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Falha ao gerar conteúdo');
+      }
+      
+      const data = await response.json();
+      
+      // Atualizar o campo correspondente com o conteúdo gerado
+      if (type === 'descrição') {
+        setFormValues(prev => ({ ...prev, description: data.content }));
+      } else if (type === 'recursos') {
+        const resources = data.content.split(';').filter(Boolean);
+        setFormValues(prev => ({ ...prev, features: resources }));
+      } else if (type === 'benefícios') {
+        const benefits = data.content.split(';').filter(Boolean);
+        setFormValues(prev => ({ ...prev, benefits: benefits }));
+      }
+    } catch (error) {
+      console.error(`Erro ao gerar ${type}:`, error);
+      setFormError(`Falha ao gerar ${type}. Tente novamente.`);
+    } finally {
+      setIsGenerating(prev => ({ ...prev, [type === 'descrição' ? 'description' : type === 'recursos' ? 'features' : 'benefits']: false }));
+    }
+  };
 
   const handleFormChange = (field: string, value: any) => {
-    // Se for um campo numérico, garantir que seja um número com no máximo 2 casas decimais
-    if (field === 'price' && typeof value === 'string') {
-      value = parseFloat(parseFloat(value).toFixed(2));
-    }
-    
     setFormValues(prev => ({
       ...prev,
       [field]: value
@@ -127,31 +191,11 @@ export default function PlanosActions() {
       // Filtra features vazias
       const filteredFeatures = formValues.features.filter(f => f.trim() !== '');
       
-      // Prepara os dados para envio com todas as propriedades obrigatórias
+      // Prepara os dados para envio
       const planData = {
-        name: formValues.name,
-        description: formValues.description,
-        shortDescription: formValues.description.substring(0, 100), // Versão curta da descrição
+        ...formValues,
+        price: Number(formValues.price),
         features: filteredFeatures.length > 0 ? filteredFeatures : ['Recurso básico'],
-        price: typeof formValues.price === 'string' ? parseFloat(parseFloat(formValues.price).toFixed(2)) : formValues.price,
-        discount: 0, // Valor padrão
-        interval: formValues.interval,
-        checkoutLink: formValues.checkoutLink,
-        platformId: formValues.platformId,
-        isActive: formValues.isActive,
-        isHighlighted: false,
-        benefits: [],
-        displayOrder: 0,
-        hasAI: false,
-        hasClientPortal: false,
-        hasLeadManagement: true,
-        hasMultiChannel: false,
-        hasRentalManagement: false,
-        hasReports: true,
-        hasSalesTools: true,
-        hasTeamManagement: false,
-        isFeatured: false,
-        isUnlimited: false,
       };
 
       const response = await createPlan(planData);
@@ -165,16 +209,74 @@ export default function PlanosActions() {
       setFormValues({
         name: '',
         description: '',
-        platformId: 'tappylink',
+        shortDescription: '',
+        platformId: platforms.length > 0 ? platforms[0].id : '',
         price: 0,
-        interval: 'monthly',
+        interval: 'mês',
         features: [''],
+        benefits: [''],
         checkoutLink: '',
         isActive: true,
+        isHighlighted: false,
+        isFeatured: false,
+        displayOrder: 0,
+        hasAI: false,
+        hasClientPortal: false,
+        hasLeadManagement: false,
+        hasMultiChannel: false,
+        hasRentalManagement: false,
+        hasReports: false,
+        hasSocialMedia: false,
+        hasWebsite: false,
+        hasScheduling: false,
+        setupFee: 0,
+        hasSalesTools: false,
+        hasTeamManagement: false,
+        isUnlimited: false,
+        maxUsers: 1
       });
       
       setIsModalOpen(false);
-      router.refresh(); // Atualiza a página para mostrar o novo plano
+      
+      // Usar um redirecionamento suave que preserva a sessão em vez de refresh
+      // Salvamos o estado da sessão antes do redirecionamento
+      if (typeof window !== 'undefined') {
+        const sessionData = localStorage.getItem('auth_token');
+        const lastActivity = localStorage.getItem('last_activity');
+        
+        // Redirecionamos para a mesma página para atualizar os dados
+        // Primeiro salvamos os dados da sessão
+        if (sessionData) localStorage.setItem('auth_token_backup', sessionData);
+        if (lastActivity) localStorage.setItem('last_activity_backup', lastActivity);
+        
+        // Definimos um listener que será executado após o carregamento da página
+        const restoreSession = () => {
+          const backupSession = localStorage.getItem('auth_token_backup');
+          const backupActivity = localStorage.getItem('last_activity_backup');
+          
+          if (backupSession) {
+            localStorage.setItem('auth_token', backupSession);
+            localStorage.removeItem('auth_token_backup');
+          }
+          
+          if (backupActivity) {
+            localStorage.setItem('last_activity', backupActivity);
+            localStorage.removeItem('last_activity_backup');
+          }
+          
+          // Removemos o listener após a execução
+          window.removeEventListener('load', restoreSession);
+        };
+        
+        // Adicionamos o listener para restaurar a sessão após o carregamento
+        window.addEventListener('load', restoreSession);
+        
+        // Redirecionamos para a mesma página
+        router.push('/dashboard/planos');
+      } else {
+        // Fallback se window não estiver disponível (improvável)
+        router.refresh();
+      }
     } catch (err) {
       console.error('Erro ao criar plano:', err);
       setFormError('Ocorreu um erro ao criar o plano. Tente novamente.');
@@ -238,7 +340,29 @@ export default function PlanosActions() {
               </div>
               
               <div className="grid gap-2">
-                <Label htmlFor="description">Descrição</Label>
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="description">Descrição</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => generateWithDeepseek('descrição')}
+                    disabled={isGenerating.description || !formValues.name}
+                    className="h-7 px-2 text-xs gap-1"
+                  >
+                    {isGenerating.description ? (
+                      <>
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                        Gerando...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-3 w-3" />
+                        Gerar com I.A.
+                      </>
+                    )}
+                  </Button>
+                </div>
                 <Textarea 
                   id="description" 
                   value={formValues.description} 
@@ -269,7 +393,7 @@ export default function PlanosActions() {
                         <SelectValue placeholder="Selecione uma plataforma" />
                       </SelectTrigger>
                       <SelectContent>
-                        {platforms.map(platform => (
+                        {platforms.map((platform) => (
                           <SelectItem key={platform.id} value={platform.id}>
                             {platform.name}
                           </SelectItem>
@@ -287,11 +411,7 @@ export default function PlanosActions() {
                     min="0" 
                     step="0.01"
                     value={formValues.price} 
-                    onChange={(e) => {
-                      // Garante que o valor tenha no máximo 2 casas decimais
-                      const value = parseFloat(parseFloat(e.target.value).toFixed(2));
-                      handleFormChange('price', value);
-                    }}
+                    onChange={(e) => handleFormChange('price', e.target.value)}
                   />
                 </div>
               </div>
@@ -306,11 +426,10 @@ export default function PlanosActions() {
                     <SelectValue placeholder="Selecione o intervalo" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="month">Mensal</SelectItem>
-                    <SelectItem value="quarter">Trimestral</SelectItem>
-                    <SelectItem value="semester">Semestral</SelectItem>
-                    <SelectItem value="year">Anual</SelectItem>
-                    <SelectItem value="once">Pagamento Único</SelectItem>
+                    <SelectItem value="monthly">Mensal</SelectItem>
+                    <SelectItem value="quarterly">Trimestral</SelectItem>
+                    <SelectItem value="semiannual">Semestral</SelectItem>
+                    <SelectItem value="annual">Anual</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -326,17 +445,65 @@ export default function PlanosActions() {
                 <p className="text-xs text-gray-500">Link para o checkout do plano (Stripe, PayPal, etc.)</p>
               </div>
               
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="maxUsers">Número Máximo de Usuários</Label>
+                  <Input 
+                    id="maxUsers" 
+                    type="number" 
+                    min="1"
+                    value={formValues.maxUsers} 
+                    onChange={(e) => handleFormChange('maxUsers', parseInt(e.target.value) || 1)}
+                  />
+                  <p className="text-xs text-gray-500">Mínimo de 1 usuário por plano</p>
+                </div>
+                
+                <div className="grid gap-2">
+                  <Label htmlFor="isUnlimited">Usuários Ilimitados</Label>
+                  <div className="flex items-center space-x-2 mt-2">
+                    <Switch 
+                      id="isUnlimited" 
+                      checked={formValues.isUnlimited}
+                      onCheckedChange={(checked) => handleFormChange('isUnlimited', checked)}
+                    />
+                    <Label htmlFor="isUnlimited" className="cursor-pointer">Ativar usuários ilimitados</Label>
+                  </div>
+                </div>
+              </div>
+              
               <div className="grid gap-2">
                 <div className="flex items-center justify-between">
                   <Label>Recursos do Plano</Label>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={addFeature}
-                  >
-                    Adicionar Recurso
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => generateWithDeepseek('recursos')}
+                      disabled={isGenerating.features || !formValues.name}
+                      className="h-8 px-2 text-xs gap-1"
+                    >
+                      {isGenerating.features ? (
+                        <>
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                          Gerando...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="h-3 w-3" />
+                          Gerar com I.A.
+                        </>
+                      )}
+                    </Button>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={addFeature}
+                    >
+                      Adicionar Recurso
+                    </Button>
+                  </div>
                 </div>
                 
                 {formValues.features.map((feature, index) => (

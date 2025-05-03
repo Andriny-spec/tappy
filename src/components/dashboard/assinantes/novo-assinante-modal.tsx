@@ -48,6 +48,8 @@ interface NovoAssinanteModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  assinanteData?: any; // Dados do assinante para edição
+  editing?: boolean; // Flag que indica se está editando
 }
 
 interface Usuario {
@@ -72,7 +74,7 @@ interface Plano {
   description: string;
 }
 
-export function NovoAssinanteModal({ isOpen, onClose, onSuccess }: NovoAssinanteModalProps) {
+export function NovoAssinanteModal({ isOpen, onClose, onSuccess, assinanteData, editing = false }: NovoAssinanteModalProps) {
   const [assinanteTipo, setAssinanteTipo] = useState('existente');
   const [loading, setLoading] = useState(false);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
@@ -116,6 +118,36 @@ export function NovoAssinanteModal({ isOpen, onClose, onSuccess }: NovoAssinante
           if (plansResponse.ok) {
             const plansData = await plansResponse.json();
             setPlanos(plansData.planos);
+            
+            // Se estiver em modo de edição e tiver dados do assinante,
+            // preencher os campos com os dados recebidos
+            if (editing && assinanteData) {
+              // Preenchendo campos de usuário
+              setAssinanteTipo('existente');
+              setUsuarioSelecionado(assinanteData.id);
+              
+              // Preenchendo plataforma e plano
+              setTimeout(() => {
+                const plataforma = plataformas.find(
+                  (p: Plataforma) => p.name === assinanteData.plataforma
+                );
+                
+                if (plataforma) {
+                  setPlataformaSelecionada(plataforma.id);
+                  
+                  // Após selecionar a plataforma, vamos buscar o plano
+                  setTimeout(() => {
+                    const filtered = planos.filter(
+                      (p: Plano) => p.platformId === plataforma.id && p.name === assinanteData.plano
+                    );
+                    
+                    if (filtered.length > 0) {
+                      setPlanoSelecionado(filtered[0].id);
+                    }
+                  }, 100);
+                }
+              }, 100);
+            }
           }
         } catch (error) {
           console.error('Erro ao buscar dados:', error);
@@ -127,7 +159,7 @@ export function NovoAssinanteModal({ isOpen, onClose, onSuccess }: NovoAssinante
 
       fetchData();
     }
-  }, [isOpen]);
+  }, [isOpen, editing, assinanteData]);
 
   // Filtrar planos de acordo com a plataforma selecionada
   useEffect(() => {
@@ -211,6 +243,9 @@ export function NovoAssinanteModal({ isOpen, onClose, onSuccess }: NovoAssinante
       
       toast.success('Assinante adicionado com sucesso');
 
+      // Forçar atualização da página para mostrar o novo assinante na tabela
+      window.location.href = window.location.pathname + '?t=' + Date.now();
+      
       resetForm();
       onClose();
       if (onSuccess) onSuccess();
@@ -240,20 +275,20 @@ export function NovoAssinanteModal({ isOpen, onClose, onSuccess }: NovoAssinante
         ) : (
           <>
             <div className="grid gap-6 py-4">
-              <div className="space-y-2">
-                <Label>Tipo de Assinante</Label>
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Tipo de Assinante</Label>
                 <RadioGroup
                   value={assinanteTipo}
                   onValueChange={setAssinanteTipo}
-                  className="flex space-x-4"
+                  className="grid grid-cols-2 gap-4"
                 >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="existente" id="usuario-existente" />
-                    <Label htmlFor="usuario-existente">Usuário Existente</Label>
+                  <div className="flex items-center space-x-2 border rounded-md p-3 hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => setAssinanteTipo('existente')}>
+                    <RadioGroupItem value="existente" id="usuario-existente" className="text-[#25D366]" />
+                    <Label htmlFor="usuario-existente" className="cursor-pointer font-medium">Usuário Existente</Label>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="novo" id="novo-usuario" />
-                    <Label htmlFor="novo-usuario">Novo Usuário</Label>
+                  <div className="flex items-center space-x-2 border rounded-md p-3 hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => setAssinanteTipo('novo')}>
+                    <RadioGroupItem value="novo" id="novo-usuario" className="text-[#25D366]" />
+                    <Label htmlFor="novo-usuario" className="cursor-pointer font-medium">Novo Usuário</Label>
                   </div>
                 </RadioGroup>
               </div>
@@ -307,53 +342,71 @@ export function NovoAssinanteModal({ isOpen, onClose, onSuccess }: NovoAssinante
                   </Popover>
                 </div>
               ) : (
-                <div className="grid gap-4">
+                <div className="grid gap-4 pt-1">
                   <div className="space-y-2">
-                    <Label htmlFor="nome">Nome</Label>
-                    <Input
-                      id="nome"
-                      placeholder="Nome do usuário"
-                      value={novoNome}
-                      onChange={(e) => setNovoNome(e.target.value)}
-                    />
+                    <Label htmlFor="nome" className="text-sm font-medium">Nome</Label>
+                    <div className="relative">
+                      <Input
+                        id="nome"
+                        placeholder="Nome do usuário"
+                        value={novoNome}
+                        onChange={(e) => setNovoNome(e.target.value)}
+                        className="h-10 pl-8 border-gray-200 focus:border-[#25D366] focus:ring-[#25D366]/20"
+                      />
+                      <div className="absolute left-2.5 top-2.5 text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                      </div>
+                    </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="email@exemplo.com"
-                      value={novoEmail}
-                      onChange={(e) => setNovoEmail(e.target.value)}
-                    />
+                    <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+                    <div className="relative">
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="email@exemplo.com"
+                        value={novoEmail}
+                        onChange={(e) => setNovoEmail(e.target.value)}
+                        className="h-10 pl-8 border-gray-200 focus:border-[#25D366] focus:ring-[#25D366]/20"
+                      />
+                      <div className="absolute left-2.5 top-2.5 text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-mail"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                      </div>
+                    </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="telefone">Telefone (opcional)</Label>
-                    <Input
-                      id="telefone"
-                      placeholder="(00) 00000-0000"
-                      value={novoTelefone}
-                      onChange={(e) => setNovoTelefone(e.target.value)}
-                    />
+                    <Label htmlFor="telefone" className="text-sm font-medium">Telefone (opcional)</Label>
+                    <div className="relative">
+                      <Input
+                        id="telefone"
+                        placeholder="(00) 00000-0000"
+                        value={novoTelefone}
+                        onChange={(e) => setNovoTelefone(e.target.value)}
+                        className="h-10 pl-8 border-gray-200 focus:border-[#25D366] focus:ring-[#25D366]/20"
+                      />
+                      <div className="absolute left-2.5 top-2.5 text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-phone"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
 
-              <div className="space-y-2">
-                <Label htmlFor="plataforma">Plataforma</Label>
+              <div className="space-y-3 mt-2">
+                <Label htmlFor="plataforma" className="text-sm font-medium">Plataforma</Label>
                 <Select 
                   value={plataformaSelecionada} 
                   onValueChange={setPlataformaSelecionada}
                 >
-                  <SelectTrigger id="plataforma">
+                  <SelectTrigger id="plataforma" className="h-10 border-gray-200 focus:border-[#25D366] focus:ring-[#25D366]/20">
                     <SelectValue placeholder="Selecione uma plataforma" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="border-gray-200">
                     <SelectGroup>
                       <SelectLabel>Plataformas</SelectLabel>
                       {plataformas.map((plataforma) => (
                         <SelectItem key={plataforma.id} value={plataforma.id}>
-                          {plataforma.name} ({plataforma.url})
+                          <span className="font-medium">{plataforma.name}</span> <span className="text-xs text-gray-500">({plataforma.url})</span>
                         </SelectItem>
                       ))}
                     </SelectGroup>
@@ -361,35 +414,55 @@ export function NovoAssinanteModal({ isOpen, onClose, onSuccess }: NovoAssinante
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="plano">Plano</Label>
+              <div className="space-y-3">
+                <Label htmlFor="plano" className="text-sm font-medium">Plano</Label>
                 <Select 
                   value={planoSelecionado} 
                   onValueChange={setPlanoSelecionado}
-                  disabled={!plataformaSelecionada || planosFiltrados.length === 0}
+                  disabled={!plataformaSelecionada}
                 >
-                  <SelectTrigger id="plano">
-                    <SelectValue placeholder={!plataformaSelecionada ? "Selecione uma plataforma primeiro" : "Selecione um plano"} />
+                  <SelectTrigger id="plano" className="h-10 border-gray-200 focus:border-[#25D366] focus:ring-[#25D366]/20">
+                    <SelectValue placeholder={!plataformaSelecionada ? "Selecione uma plataforma primeiro" : planosFiltrados.length === 0 ? "Nenhum plano disponível" : "Selecione um plano"} />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Planos disponíveis</SelectLabel>
-                      {planosFiltrados.map((plano) => (
-                        <SelectItem key={plano.id} value={plano.id}>
-                          {plano.name} - R$ {plano.price.toFixed(2).replace('.', ',')}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
+                  <SelectContent className="border-gray-200">
+                    {planosFiltrados.length === 0 ? (
+                      <div className="p-2 text-center text-sm text-gray-500">
+                        Nenhum plano disponível para esta plataforma
+                      </div>
+                    ) : (
+                      <SelectGroup>
+                        <SelectLabel>Planos disponíveis</SelectLabel>
+                        {planosFiltrados.map((plano) => (
+                          <SelectItem key={plano.id} value={plano.id}>
+                            <div className="flex justify-between w-full">
+                              <span className="font-medium">{plano.name}</span> 
+                              <span className="text-[#25D366] font-semibold">R$ {plano.price.toFixed(2).replace('.', ',')}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    )}
                   </SelectContent>
                 </Select>
+                {plataformaSelecionada && planosFiltrados.length === 0 && (
+                  <p className="text-xs text-amber-600">Nenhum plano cadastrado para esta plataforma. Cadastre planos primeiro.</p>
+                )}
               </div>
             </div>
 
-            <DialogFooter>
-              <Button variant="outline" onClick={handleClose}>
+            <DialogFooter className="flex justify-end gap-2 pt-4 border-t mt-4">
+              <Button 
+                variant="outline" 
+                onClick={handleClose}
+                className="border-gray-200 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+              >
                 Cancelar
               </Button>
-              <Button onClick={handleSubmit} disabled={loading}>
+              <Button 
+                onClick={handleSubmit} 
+                disabled={loading}
+                className="bg-[#25D366] hover:bg-[#20BD59] text-white font-medium transition-colors"
+              >
                 {loading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
                 Adicionar Assinante
               </Button>

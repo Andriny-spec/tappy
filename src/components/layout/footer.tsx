@@ -10,9 +10,9 @@ const footerLinks = [
   {
     title: "Produtos",
     links: [
-      { name: "Tappy ID", href: "#tappy-id" },
-      { name: "Tappy Whats", href: "#tappy-whats" },
-      { name: "Tappy Imob", href: "#tappy-imob" },
+      { name: "Tappy ID", href: "https://tappy.id/" },
+      { name: "Tappy Whats", href: "https://whats.tappy.id/" },
+      { name: "Tappy Imob", href: "https://imob.tappy.id/" },
       { name: "Para Você", href: "/para-voce" },
       { name: "Para Empresas", href: "/para-empresas" },
     ],
@@ -21,10 +21,10 @@ const footerLinks = [
     title: "Empresa",
     links: [
       { name: "Sobre nós", href: "/sobre" },
-      { name: "Carreiras", href: "/carreiras" },
-      { name: "Notícias", href: "/noticias" },
-      { name: "Parceiros", href: "/parceiros" },
-      { name: "Investidores", href: "/investidores" },
+      { name: "Soluções", href: "/solucoes" },
+      { name: "Tecnologias", href: "/tecnologias" },
+      { name: "Vantagens", href: "/vantagens" },
+      { name: "Treinamentos", href: "/treinamentos" },
     ],
   },
   {
@@ -34,16 +34,16 @@ const footerLinks = [
       { name: "Tutoriais", href: "/tutoriais" },
       { name: "Documentação", href: "/docs" },
       { name: "Status", href: "/status" },
-      { name: "API", href: "/developers" },
+      { name: "API", href: "/api-tappy" },
     ],
   },
   {
     title: "Suporte",
     links: [
-      { name: "Central de Ajuda", href: "/ajuda" },
-      { name: "Contato", href: "/contato" },
-      { name: "FAQ", href: "/faq" },
-      { name: "Portal do Cliente", href: "/portal" },
+      { name: "Central de Ajuda", href: "/central-de-ajuda" },
+      { name: "Contato", href: "/suporte" },
+      { name: "FAQ", href: "/duvidas-frequentes" },
+      { name: "Treinamentos", href: "/treinamentos" },
       { name: "Comunidade", href: "/comunidade" },
     ],
   },
@@ -188,7 +188,7 @@ export function Footer() {
               >
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-tappyGreen via-tappyGreen/90 to-tappyGreen/70">
                   Transforme seu negócio
-                </span> com a <span className="text-foreground">Tappy</span>
+                </span> <span className="text-foreground">com a Tappy e aumente suas vendas </span>
               </motion.h2>
               
               <motion.p 
@@ -214,7 +214,7 @@ export function Footer() {
                 size="lg"
                 className="bg-gradient-to-r from-tappyGreen to-tappyGreen/80 text-white shadow-lg shadow-tappyGreen/20 hover:shadow-tappyGreen/30 transition-all duration-300 px-8 border-0"
               >
-                <Link href="#contato">
+                <Link href="/suporte">
                   Agende uma Demonstração
                 </Link>
               </Button>
@@ -225,7 +225,7 @@ export function Footer() {
                 size="lg"
                 className="border-tappyGreen/30 hover:border-tappyGreen hover:bg-tappyGreen/5 transition-all duration-300"
               >
-                <Link href="/precos">
+                <Link href="/planos">
                   Ver Preços
                 </Link>
               </Button>

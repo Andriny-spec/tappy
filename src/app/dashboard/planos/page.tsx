@@ -81,9 +81,9 @@ export default async function PlanosPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Planos</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Gerenciamento de Planos</h1>
         <p className="text-gray-500 dark:text-gray-400">
-          Gerencie os planos disponíveis em todas as plataformas Tappy.
+          Crie e gerencie os planos de assinatura da sua plataforma Tappy.
         </p>
       </div>
       

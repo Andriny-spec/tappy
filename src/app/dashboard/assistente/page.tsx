@@ -1,244 +1,289 @@
-'use client';
+"use client";
 
-import React, { useState, useRef, useEffect } from 'react';
-import { Bot, Send, User, Sparkles, CornerDownLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { sendMessageToDeepSeek } from '@/lib/services/deepseek-service';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { cn } from '@/lib/utils';
+import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Sparkles, Send, Loader2, Bot, RotateCcw } from "lucide-react";
 
-type Message = {
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+
+interface Mensagem {
   id: string;
-  role: 'user' | 'assistant';
-  content: string;
+  conteudo: string;
+  remetente: "usuario" | "assistente";
   timestamp: Date;
-};
-
-const modelOptions = [
-  { value: 'deepseek-chat', label: 'DeepSeek Chat' },
-  { value: 'deepseek-coder', label: 'DeepSeek Coder' },
-];
+}
 
 export default function AssistentePage() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      role: 'assistant',
-      content: 'Olá! Sou o Assistente Tappy, como posso ajudar você hoje?',
-      timestamp: new Date(),
-    },
-  ]);
-  const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedModel, setSelectedModel] = useState('deepseek-chat');
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [mensagens, setMensagens] = useState<Mensagem[]>([]);
+  const [mensagemAtual, setMensagemAtual] = useState("");
+  const [isCarregando, setIsCarregando] = useState(false);
+  const mensagensContainerRef = useRef<HTMLDivElement>(null);
 
-  // Lista de sugestões iniciais
-  const suggestions = [
-    'Como posso aumentar minhas vendas?',
-    'Gerar um relatório de desempenho mensal',
-    'Quais são as melhores práticas para atendimento?',
-    'Ideias para marketing no WhatsApp',
+  // Exemplos de perguntas para o assistente
+  const exemplos = [
+    "Me explique como funciona a plataforma Tappy Whats",
+    "Quais são os principais recursos do Tappy Imob?",
+    "Como posso integrar meu banco de imóveis no Tappy?",
+    "Qual a diferença entre Tappy Link e Tappy ID?"
   ];
 
-  // Scroll para o final da conversa quando novas mensagens chegarem
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (mensagensContainerRef.current) {
+      mensagensContainerRef.current.scrollTop = mensagensContainerRef.current.scrollHeight;
+    }
+  }, [mensagens]);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const generateUniqueId = () => {
-    return Date.now().toString(36) + Math.random().toString(36).substring(2);
-  };
-
-  const handleSendMessage = async () => {
-    if (!input.trim()) return;
-    
-    const userMessage: Message = {
-      id: generateUniqueId(),
-      role: 'user',
-      content: input,
+  // Mensagem de boas-vindas ao carregar a página
+  useEffect(() => {
+    const mensagemBoasVindas: Mensagem = {
+      id: `a-${Date.now()}`,
+      conteudo: "Olá! Sou seu assistente Tappy. Como posso ajudar você hoje?",
+      remetente: "assistente",
       timestamp: new Date(),
     };
-    
-    setMessages((prev) => [...prev, userMessage]);
-    setInput('');
-    setIsLoading(true);
-    
+    setMensagens([mensagemBoasVindas]);
+  }, []);
+
+  const enviarMensagem = async () => {
+    if (!mensagemAtual.trim() || isCarregando) return;
+
+    const novaMensagemUsuario: Mensagem = {
+      id: `u-${Date.now()}`,
+      conteudo: mensagemAtual,
+      remetente: "usuario",
+      timestamp: new Date(),
+    };
+
+    setMensagens((prev) => [...prev, novaMensagemUsuario]);
+    setMensagemAtual("");
+    setIsCarregando(true);
+
     try {
-      // Preparar o histórico de mensagens para enviar para a API DeepSeek
-      const messageHistory = messages
-        .concat(userMessage)
-        .map(msg => ({
-          role: msg.role,
-          content: msg.content
-        }));
-      
-      // Remover a primeira mensagem se for do assistente (mensagem de boas-vindas)
-      if (messageHistory.length > 0 && messageHistory[0].role === 'assistant') {
-        messageHistory.shift();
+      // Preparar o histórico de mensagens para enviar à API
+      const historicoFormatado = mensagens.map(msg => ({
+        role: msg.remetente === "usuario" ? "user" : "assistant",
+        content: msg.conteudo
+      }));
+
+      // Implementação do endpoint para usar a API DeepSeek
+      const resposta = await fetch("/api/ai/assistente", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          mensagem: mensagemAtual,
+          historico: historicoFormatado,
+          // Buscamos dados da base de conhecimento do suporte
+          baseDeConhecimento: true
+        }),
+      });
+
+      const dados = await resposta.json();
+
+      if (resposta.ok) {
+        const novaMensagemAssistente: Mensagem = {
+          id: `a-${Date.now()}`,
+          conteudo: dados.resposta,
+          remetente: "assistente",
+          timestamp: new Date(),
+        };
+
+        setMensagens((prev) => [...prev, novaMensagemAssistente]);
+      } else {
+        throw new Error(dados.erro || "Erro ao processar a mensagem");
       }
+    } catch (erro) {
+      console.error("Erro ao enviar mensagem:", erro);
       
-      // Chamada à API DeepSeek
-      const response = await sendMessageToDeepSeek(messageHistory, selectedModel);
-      
-      // Criar mensagem de resposta
-      const assistantMessage: Message = {
-        id: generateUniqueId(),
-        role: 'assistant',
-        content: response.error ? 
-          `Erro ao conectar com a API: ${response.error}` : 
-          response.content,
+      // Mensagem de fallback em caso de erro
+      const mensagemErro: Mensagem = {
+        id: `e-${Date.now()}`,
+        conteudo: "Desculpe, tive um problema para processar sua solicitação. Tente novamente mais tarde.",
+        remetente: "assistente",
         timestamp: new Date(),
       };
       
-      setMessages((prev) => [...prev, assistantMessage]);
-    } catch (error) {
-      console.error('Erro ao enviar mensagem:', error);
-      
-      // Mensagem de erro para o usuário
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: generateUniqueId(),
-          role: 'assistant',
-          content: 'Desculpe, ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.',
-          timestamp: new Date(),
-        },
-      ]);
+      setMensagens((prev) => [...prev, mensagemErro]);
     } finally {
-      setIsLoading(false);
+      setIsCarregando(false);
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSendMessage();
+      enviarMensagem();
     }
   };
 
-  const handleSuggestionClick = (suggestion: string) => {
-    setInput(suggestion);
+  const enviarExemplo = (exemplo: string) => {
+    setMensagemAtual(exemplo);
+  };
+
+  const limparHistorico = () => {
+    const mensagemBoasVindas: Mensagem = {
+      id: `a-${Date.now()}`,
+      conteudo: "Histórico limpo. Como posso ajudar você agora?",
+      remetente: "assistente",
+      timestamp: new Date(),
+    };
+    setMensagens([mensagemBoasVindas]);
   };
 
   return (
-    <div className="container mx-auto py-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Assistente Tappy</h1>
-          <p className="text-muted-foreground">Seu assistente inteligente para ajudar com suas tarefas</p>
-        </div>
-        <Badge className="bg-white border-[#25D366] text-[#25D366] border flex items-center gap-1">
-          <Sparkles className="h-3.5 w-3.5" />
-          Inteligência Artificial
-        </Badge>
-      </div>
-
-      <Card className="flex flex-col h-[calc(100vh-200px)]">
-        <CardHeader className="px-4 py-3 border-b">
-          <div className="flex items-center gap-2">
-            <Bot className="h-5 w-5 text-[#25D366]" />
-            <CardTitle className="text-lg">Conversa com Assistente</CardTitle>
-          </div>
-          <CardDescription>
-            Use linguagem natural para fazer perguntas ou solicitar ajuda
-          </CardDescription>
-        </CardHeader>
-        
-        <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={cn(
-                'flex w-max max-w-[80%] rounded-lg p-4',
-                message.role === 'user'
-                  ? 'ml-auto bg-[#25D366] text-white'
-                  : 'bg-gray-100 dark:bg-gray-800'
-              )}
-            >
-              <div className="flex gap-3">
-                <div className="flex h-6 w-6 shrink-0 select-none items-center justify-center rounded-full">
-                  {message.role === 'user' ? (
-                    <User className="h-4 w-4" />
-                  ) : (
-                    <Bot className="h-4 w-4" />
-                  )}
-                </div>
-                <div>
-                  <div className="whitespace-pre-wrap">{message.content}</div>
-                  <div className="mt-1 text-xs opacity-50">
-                    {message.timestamp.toLocaleTimeString()}
-                  </div>
-                </div>
+    <div className="container mx-auto px-4 py-6 max-w-6xl">
+      <Card className="border-none shadow-lg backdrop-blur-sm bg-white/80">
+        <CardHeader className="bg-gradient-to-r from-teal-500 to-emerald-500 text-white rounded-t-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Bot className="h-8 w-8" />
+              <div>
+                <CardTitle className="text-xl">Assistente Tappy</CardTitle>
+                <CardDescription className="text-gray-100">
+                  Integrado com a base de conhecimento de suporte
+                </CardDescription>
               </div>
             </div>
-          ))}
-          {isLoading && (
-            <div className="flex w-max max-w-[80%] rounded-lg p-4 bg-gray-100 dark:bg-gray-800">
-              <div className="flex gap-3">
-                <div className="flex h-6 w-6 shrink-0 select-none items-center justify-center rounded-full">
-                  <Bot className="h-4 w-4" />
-                </div>
-                <div>
-                  <div className="whitespace-pre-wrap">
-                    <div className="flex items-center gap-1">
-                      <div className="h-2 w-2 rounded-full bg-[#25D366] animate-bounce"></div>
-                      <div className="h-2 w-2 rounded-full bg-[#25D366] animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                      <div className="h-2 w-2 rounded-full bg-[#25D366] animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-white hover:bg-white/20"
+              onClick={limparHistorico}
+            >
+              <RotateCcw className="h-5 w-5" />
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          {/* Área de Mensagens */}
+          <div 
+            ref={mensagensContainerRef}
+            className="flex-1 overflow-y-auto p-6 space-y-4"
+            style={{ height: "calc(70vh - 200px)", minHeight: "400px" }}
+          >
+            <AnimatePresence>
+              {mensagens.map((msg) => (
+                <motion.div
+                  key={msg.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className={`flex ${msg.remetente === "usuario" ? "justify-end" : "justify-start"}`}
+                >
+                  <div className={`flex gap-3 max-w-3xl ${msg.remetente === "usuario" ? "flex-row-reverse" : "flex-row"}`}>
+                    {msg.remetente === "assistente" && (
+                      <Avatar className="h-10 w-10 border-2 border-emerald-200">
+                        <AvatarFallback className="bg-gradient-to-r from-teal-500 to-emerald-500 text-white">
+                          TP
+                        </AvatarFallback>
+                      </Avatar>
+                    )}
+                    
+                    <div
+                      className={`p-4 rounded-xl shadow-sm ${
+                        msg.remetente === "usuario"
+                          ? "bg-emerald-500 text-white"
+                          : "bg-white border border-gray-100"
+                      }`}
+                    >
+                      <div className="whitespace-pre-wrap">{msg.conteudo}</div>
+                      <div 
+                        className={`text-xs mt-1 ${
+                          msg.remetente === "usuario" ? "text-white/70 text-right" : "text-gray-400"
+                        }`}
+                      >
+                        {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      </div>
+                    </div>
+                    
+                    {msg.remetente === "usuario" && (
+                      <Avatar className="h-10 w-10">
+                        <AvatarFallback className="bg-gray-200 text-gray-600">
+                          EU
+                        </AvatarFallback>
+                      </Avatar>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+              
+              {isCarregando && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex justify-start"
+                >
+                  <div className="flex gap-3 max-w-3xl">
+                    <Avatar className="h-10 w-10 border-2 border-emerald-200">
+                      <AvatarFallback className="bg-gradient-to-r from-teal-500 to-emerald-500 text-white">
+                        TP
+                      </AvatarFallback>
+                    </Avatar>
+                    
+                    <div className="p-4 rounded-xl bg-white border border-gray-100 shadow-sm">
+                      <div className="flex items-center gap-2 text-gray-500">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Pensando...</span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Exemplos de Perguntas - Mostrar apenas se não tiver mensagens do usuário */}
+          {mensagens.length <= 1 && (
+            <div className="px-6 mb-6">
+              <h4 className="text-gray-600 mb-3 text-sm font-medium flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-amber-500" />
+                Perguntas sugeridas:
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {exemplos.map((exemplo, idx) => (
+                  <Button
+                    key={idx}
+                    variant="outline"
+                    className="justify-start h-auto py-3 px-4 border border-emerald-100 hover:border-emerald-200 text-left whitespace-normal"
+                    onClick={() => enviarExemplo(exemplo)}
+                  >
+                    {exemplo}
+                  </Button>
+                ))}
               </div>
             </div>
           )}
-          <div ref={messagesEndRef} />
+
+          {/* Área de Input */}
+          <div className="p-4 border-t border-gray-100">
+            <div className="flex gap-4">
+              <Textarea
+                value={mensagemAtual}
+                onChange={(e) => setMensagemAtual(e.target.value)}
+                onKeyDown={handleKeyPress}
+                placeholder="Digite sua mensagem..."
+                className="min-h-12 resize-none flex-1"
+                disabled={isCarregando}
+              />
+              <Button
+                onClick={enviarMensagem}
+                disabled={isCarregando || !mensagemAtual.trim()}
+                className="self-end shrink-0 bg-gradient-to-r from-teal-500 to-emerald-500 text-white"
+              >
+                {isCarregando ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+          </div>
         </CardContent>
-        
-        <CardFooter className="p-4 border-t">
-          <div className="flex w-full items-center gap-2">
-            <Textarea
-              placeholder="Digite sua mensagem..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className="min-h-10 flex-1"
-              rows={1}
-            />
-            <Button 
-              size="icon" 
-              className="rounded-full bg-[#25D366] hover:bg-[#128C7E]"
-              onClick={handleSendMessage}
-              disabled={isLoading || !input.trim()}
-            >
-              <Send className="h-4 w-4" />
-              <span className="sr-only">Enviar mensagem</span>
-            </Button>
-          </div>
-          <div className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-            <CornerDownLeft className="h-3 w-3" /> 
-            Pressione Enter para enviar, Shift+Enter para nova linha
-          </div>
-        </CardFooter>
       </Card>
     </div>
   );

@@ -44,14 +44,15 @@ export default function LoginPage() {
     setError('');
 
     try {
+      // O NextAuth não permite passar o maxAge diretamente para o signIn
+      // Vamos armazenar a preferência no localStorage
+      localStorage.setItem('rememberMe', remember ? 'true' : 'false');
+      
       const result = await signIn('credentials', {
         email,
         password,
         redirect: false,
-        callbackUrl: '/dashboard',
-        // Se a opção lembrar-me estiver marcada, sessão dura 30 dias
-        // senão, dura apenas a sessão do navegador
-        ...(remember ? { maxAge: 30 * 24 * 60 * 60 } : {})
+        callbackUrl: '/dashboard'
       });
 
       if (result?.error) {
@@ -59,7 +60,7 @@ export default function LoginPage() {
         toast.error('Credenciais inválidas. Tente novamente.');
       } else {
         toast.success('Login realizado com sucesso!');
-        router.push('https://tappy.id/dashboard');
+        router.push('/dashboard');
       }
     } catch (error) {
       console.error(error);

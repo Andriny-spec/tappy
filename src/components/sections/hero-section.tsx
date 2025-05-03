@@ -147,7 +147,7 @@ export function HeroSection() {
       <div className="absolute top-0 left-0 -translate-x-1/4 -translate-y-1/4 w-96 h-96 rounded-full bg-tappyGreen/10 blur-3xl" />
       <div className="absolute bottom-0 right-0 translate-x-1/4 translate-y-1/4 w-96 h-96 rounded-full bg-tappyBlue/10 blur-3xl" />
       
-      <div className="container relative z-10 space-y-10 md:space-y-16 text-center">
+      <div className="container max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-10 md:space-y-16 text-center">
         <SpotlightText className="w-full">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -162,7 +162,7 @@ export function HeroSection() {
               transition={{ duration: 0.8 }}
             >
               <AnimatedText 
-                text="TAPPY" 
+                text="TAPPY I.A" 
                 className="gradient-text relative inline-block" 
                 delay={0.1} 
               />
@@ -217,12 +217,7 @@ export function HeroSection() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
-          <Button asChild size="lg" variant="gradient" className="text-lg font-medium px-8">
-            <Link href="#produtos">Ver Produtos</Link>
-          </Button>
-          <Button asChild size="lg" variant="outline" className="text-lg font-medium px-8">
-            <Link href="#contato">Fale Conosco</Link>
-          </Button>
+          
         </motion.div>
 
         <motion.div

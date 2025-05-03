@@ -18,42 +18,18 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 
-// Mock data para os gráficos
-const mockLineChartData = [
-  { x: 'Jan', y: 12500 },
-  { x: 'Fev', y: 18200 },
-  { x: 'Mar', y: 16800 },
-  { x: 'Abr', y: 19500 },
-  { x: 'Mai', y: 22300 },
-  { x: 'Jun', y: 24100 },
-  { x: 'Jul', y: 21800 },
-  { x: 'Ago', y: 26500 },
-  { x: 'Set', y: 28300 },
-  { x: 'Out', y: 30200 },
-  { x: 'Nov', y: 32800 },
-  { x: 'Dez', y: 36500 },
-];
+// Dados zerados conforme solicitado
+type ChartDataPoint = { x: string; y: number };
+const mockLineChartData: ChartDataPoint[] = [];
 
-const mockBarChartData = [
-  { categoria: 'Tappy ID', valor: 45 },
-  { categoria: 'Tappy Whats', valor: 32 },
-  { categoria: 'Tappy Imob', valor: 18 },
-  { categoria: 'Outros', valor: 5 },
-];
+type BarChartDataPoint = { categoria: string; valor: number };
+const mockBarChartData: BarChartDataPoint[] = [];
 
-const mockPieChartData = [
-  { metodo: 'PIX', porcentagem: 62, cor: '#25D366' },
-  { metodo: 'Cartão de Crédito', porcentagem: 28, cor: '#4E5BA6' },
-  { metodo: 'Cartão de Débito', porcentagem: 10, cor: '#F5A623' },
-];
+type PieChartDataPoint = { metodo: string; porcentagem: number; cor: string };
+const mockPieChartData: PieChartDataPoint[] = [];
 
-const mockTransacoesData = [
-  { data: '15/10/2023', assinante: 'Carlos Silva', valor: 'R$ 149,90', plano: 'Tappy Link - Premium', metodo: 'PIX' },
-  { data: '14/10/2023', assinante: 'Maria Oliveira', valor: 'R$ 249,90', plano: 'Tappy Whats - Empresarial', metodo: 'Cartão de Crédito' },
-  { data: '13/10/2023', assinante: 'João Pereira', valor: 'R$ 149,90', plano: 'Tappy Link - Premium', metodo: 'PIX' },
-  { data: '12/10/2023', assinante: 'Ana Carolina', valor: 'R$ 99,90', plano: 'Tappy Link - Básico', metodo: 'Cartão de Débito' },
-  { data: '11/10/2023', assinante: 'Rodrigo Alves', valor: 'R$ 149,90', plano: 'Tappy Link - Premium', metodo: 'PIX' },
-];
+type TransacaoDataPoint = { data: string; assinante: string; valor: string; plano: string; metodo: string };
+const mockTransacoesData: TransacaoDataPoint[] = [];
 
 export default function RelatoriosPage() {
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -193,12 +169,12 @@ export default function RelatoriosPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg font-medium">Receita Total</CardTitle>
-            <CardDescription>Outubro 2023</CardDescription>
+            <CardDescription>Outubro 2025</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">R$ 36.450,80</div>
+            <div className="text-3xl font-bold">R$ 00.000,80</div>
             <p className="text-xs text-green-600 mt-1 flex items-center">
-              <span className="i-lucide-trending-up mr-1" />+12.5% em relação ao mês anterior
+              <span className="i-lucide-trending-up mr-1" />+00.5% em relação ao mês anterior
             </p>
           </CardContent>
         </Card>
@@ -206,12 +182,12 @@ export default function RelatoriosPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg font-medium">Novas Assinaturas</CardTitle>
-            <CardDescription>Outubro 2023</CardDescription>
+            <CardDescription>Outubro 2025</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">128</div>
+            <div className="text-3xl font-bold">00</div>
             <p className="text-xs text-green-600 mt-1 flex items-center">
-              <span className="i-lucide-trending-up mr-1" />+8.3% em relação ao mês anterior
+              <span className="i-lucide-trending-up mr-1" />+00% em relação ao mês anterior
             </p>
           </CardContent>
         </Card>
@@ -219,12 +195,12 @@ export default function RelatoriosPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg font-medium">Taxa de Retenção</CardTitle>
-            <CardDescription>Outubro 2023</CardDescription>
+            <CardDescription>Outubro 2025</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">94.2%</div>
+            <div className="text-3xl font-bold">00%</div>
             <p className="text-xs text-green-600 mt-1 flex items-center">
-              <span className="i-lucide-trending-up mr-1" />+2.1% em relação ao mês anterior
+              <span className="i-lucide-trending-up mr-1" />+00% em relação ao mês anterior
             </p>
           </CardContent>
         </Card>
@@ -257,8 +233,8 @@ export default function RelatoriosPage() {
               {renderLineChart()}
             </CardContent>
             <CardFooter className="flex justify-between">
-              <div className="text-sm text-muted-foreground">Receita Total Anual: <span className="font-bold">R$ 289.500,00</span></div>
-              <div className="text-sm text-muted-foreground">Média Mensal: <span className="font-bold">R$ 24.125,00</span></div>
+              <div className="text-sm text-muted-foreground">Receita Total Anual: <span className="font-bold">R$ 00.000,00</span></div>
+              <div className="text-sm text-muted-foreground">Média Mensal: <span className="font-bold">R$ 00.000,00</span></div>
             </CardFooter>
           </Card>
 
