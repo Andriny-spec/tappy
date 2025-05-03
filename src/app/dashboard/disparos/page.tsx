@@ -334,7 +334,7 @@ export default function DisparosPage() {
                   <SendHorizontal className="h-12 w-12 text-gray-300 mb-4" />
                   <h3 className="text-xl font-semibold mb-2">Nenhum disparo encontrado</h3>
                   <p className="text-gray-500 max-w-md">
-                    Você ainda não fez nenhum disparo. Clique em "Novo Disparo" para começar.
+                    Você ainda não fez nenhum disparo. Clique em &quot;Novo Disparo&quot; para começar.
                   </p>
                 </div>
               ) : (
@@ -497,7 +497,7 @@ export default function DisparosPage() {
                 />
                 {tipoDisparo === "WHATSAPP" && (
                   <p className="text-xs text-gray-500">
-                    <strong>Dica:</strong> Use {'{nome}'} para personalizar a mensagem com o nome do destinatário.
+                    <strong>Dica:</strong> Use &apos;{'{nome}'}&apos; para personalizar a mensagem com o nome do destinatário.
                   </p>
                 )}
               </div>
