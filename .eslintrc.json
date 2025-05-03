@@ -9,6 +9,10 @@
     "react-hooks/exhaustive-deps": "warn",
     "no-var": "warn",
     "jsx-a11y/alt-text": "warn",
-    "@next/next/no-img-element": "warn"
-  }
+    "@next/next/no-img-element": "warn",
+    "@typescript-eslint/ban-types": "off",
+    "import/no-anonymous-default-export": "off",
+    "react/display-name": "off"
+  },
+  "ignorePatterns": ["node_modules/", ".next/", "out/", "public/", "*.d.ts"]
 }

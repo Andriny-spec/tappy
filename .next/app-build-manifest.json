@@ -116,6 +116,11 @@
       "static/chunks/main-app.js",
       "static/chunks/app/page.js"
     ],
+    "/acessibilidade/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/acessibilidade/page.js"
+    ],
     "/_not-found/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",

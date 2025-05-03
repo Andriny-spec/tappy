@@ -134,7 +134,7 @@ const FAQ_DATA: FAQ[] = [
         </p>
         <ol className="list-decimal pl-5 space-y-2">
           <li>Acesse seu painel administrativo</li>
-          <li>Navegue até "Configurações" > "Assinatura"</li>
+          <li>Navegue até "Configurações" {'>'} "Assinatura"</li>
           <li>Clique em "Cancelar assinatura"</li>
           <li>Preencha o formulário de feedback (opcional)</li>
           <li>Confirme o cancelamento</li>
