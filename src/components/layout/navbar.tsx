@@ -210,7 +210,7 @@ export function Navbar() {
               <Link href="/suporte">Atendimento</Link>
             </Button>
             <Button asChild variant="gradient" size="sm" className="shadow-md shadow-tappyGreen/20 hover:shadow-tappyGreen/40 hover:shadow-lg transition-all duration-500 font-medium relative overflow-hidden group">
-              <Link href="#tappy-id" className="relative z-10 flex items-center gap-1">
+              <Link href="/planos" className="relative z-10 flex items-center gap-1">
                 <span className="relative group-hover:translate-x-1 transition-transform duration-300">Planos e Preços</span>
                 <span className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">→</span>
               </Link>

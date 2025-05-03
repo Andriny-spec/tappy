@@ -142,9 +142,7 @@ export function Topbar() {
   return (
     <div className="flex h-14 items-center justify-between border-b border-border bg-background px-4 transition-colors duration-200">
       <div className="flex items-center">
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-[#25D366] to-[#128C7E] rounded-full shadow-sm">
-          <img src="/logo.svg" alt="Tappy Logo" className="h-5 w-5" />
-        </div>
+                
       </div>
       
       <div className="flex items-center gap-4">

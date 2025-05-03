@@ -1,9 +1,8 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
   "/login/page": "app/login/page.js",
-  "/planos/page": "app/planos/page.js",
-  "/page": "app/page.js",
-  "/acessibilidade/page": "app/acessibilidade/page.js",
+  "/dashboard/relatorios/page": "app/dashboard/relatorios/page.js",
   "/dashboard/page": "app/dashboard/page.js",
-  "/dashboard/planos/page": "app/dashboard/planos/page.js"
+  "/dashboard/assistente/page": "app/dashboard/assistente/page.js",
+  "/dashboard/disparos/page": "app/dashboard/disparos/page.js"
 }

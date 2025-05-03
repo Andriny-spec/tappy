@@ -107,14 +107,30 @@ export default function PlanCard({
     setLoading(true);
     
     try {
-      // Aqui você pode fazer uma chamada à API para registrar o interesse
-      // antes de redirecionar para o link de pagamento
-      
-      // Simular tempo de processamento
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Usar exatamente o valor do ctaLink sem modificar
+      // Formatar o telefone (remover mascara)
       const phoneNumberDigits = phone.replace(/\D/g, '');
+      
+      // Criar pré-registro do assinante no sistema
+      const preRegistroResponse = await fetch('/api/assinantes/pre-registro', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          phone: phoneNumberDigits,
+          planId
+        }),
+      });
+      
+      if (!preRegistroResponse.ok) {
+        const errorData = await preRegistroResponse.json();
+        console.error('Erro ao criar pré-registro:', errorData);
+        throw new Error(errorData.error || 'Erro ao criar conta');
+      }
+      
+      const preRegistroData = await preRegistroResponse.json();
+      console.log('Pré-registro criado com sucesso:', preRegistroData);
       
       // Adicionar parâmetros de email e telefone ao link original
       const separator = ctaLink.includes('?') ? '&' : '?';

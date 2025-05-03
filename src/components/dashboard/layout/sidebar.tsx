@@ -4,15 +4,20 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
   BarChart3, 
+  Bell, 
+  BookOpen, 
+  Bot, 
+  Boxes, 
   CreditCard, 
-  Users, 
-  PackageOpen, 
   FileBarChart, 
-  Settings,
+  HomeIcon, 
+  Loader2, 
+  PackageOpen, 
+  SendHorizontal, 
+  Settings, 
+  Users,
   LogOut,
-  Bot,
   Sparkles,
-  BookOpen,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
@@ -60,15 +65,21 @@ const menuItems: SidebarItem[] = [
     icon: <BookOpen className="w-5 h-5" />
   },
   {
-    title: 'Relatórios',
-    href: '/dashboard/relatorios',
-    icon: <FileBarChart className="w-5 h-5" />
-  },
-  {
     title: 'Assistente',
     href: '/dashboard/assistente',
     icon: <Bot className="w-5 h-5" />,
     badge: { text: 'I.A', variant: 'custom' }
+  },
+  {
+    title: 'Disparos',
+    href: '/dashboard/disparos',
+    icon: <SendHorizontal className="w-5 h-5" />,
+    badge: { text: 'Novo', variant: 'custom' }
+  },
+  {
+    title: 'Relatórios',
+    href: '/dashboard/relatorios',
+    icon: <FileBarChart className="w-5 h-5" />
   },
   {
     title: 'Configurações',
