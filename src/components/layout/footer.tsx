@@ -10,7 +10,7 @@ const footerLinks = [
   {
     title: "Produtos",
     links: [
-      { name: "Tappy ID", href: "https://tappy.id/" },
+      { name: "Tappy Link", href: "https://link.tappy.id/" },
       { name: "Tappy Whats", href: "https://whats.tappy.id/" },
       { name: "Tappy Imob", href: "https://imob.tappy.id/" },
       { name: "Para Você", href: "/para-voce" },
