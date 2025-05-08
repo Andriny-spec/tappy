@@ -28,6 +28,7 @@ export async function GET() {
         price: true,
         interval: true,
         features: true,
+        checkoutLink: true,
         platform: {
           select: {
             name: true,
@@ -41,7 +42,26 @@ export async function GET() {
       ]
     });
 
-    return NextResponse.json({ planos });
+    // Adicionar checkoutLink padrão para planos que não possuem
+    const planosComCheckout = planos.map(plano => {
+      if (!plano.checkoutLink) {
+        const platform = plano.platform?.slug || '';
+        
+        // Gerar checkoutLink com base na plataforma
+        if (platform === 'tappylink') {
+          plano.checkoutLink = `https://link.tappy.id/checkout/${plano.id}`;
+        } else if (platform === 'tappyimob') {
+          plano.checkoutLink = `https://tappy.id/checkout?planId=${plano.id}&type=IMOBILIARIA&origin=tappyimob-site`;
+        } else if (platform === 'tappywhats') {
+          plano.checkoutLink = `https://whats.tappy.id/checkout/${plano.id}`;
+        } else {
+          plano.checkoutLink = `https://tappy.id/checkout/${plano.id}`;
+        }
+      }
+      return plano;
+    });
+
+    return NextResponse.json({ planos: planosComCheckout });
   } catch (error) {
     console.error('Erro ao buscar planos:', error);
     return NextResponse.json(

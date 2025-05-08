@@ -45,7 +45,8 @@ export async function GET() {
       platform: {
         name: tappyImob.name,
         slug: tappyImob.slug
-      }
+      },
+      checkoutLink: plan.checkoutLink || `https://tappy.id/checkout?planId=${plan.id}&type=IMOBILIARIA&origin=tappyimob-site`
     }));
 
     return NextResponse.json(formattedPlans, { status: 200 });
