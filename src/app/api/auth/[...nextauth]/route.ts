@@ -82,6 +82,7 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 dias em segundos
+    updateAge: 24 * 60 * 60, // Atualizar sessão a cada 24 horas
   },
   jwt: {
     maxAge: 30 * 24 * 60 * 60, // 30 dias em segundos
@@ -94,7 +95,8 @@ export const authOptions: NextAuthOptions = {
         sameSite: "lax",
         path: "/",
         secure: process.env.NODE_ENV === "production",
-        maxAge: 30 * 24 * 60 * 60 // 30 dias em segundos
+        maxAge: 30 * 24 * 60 * 60, // 30 dias em segundos
+        domain: undefined // Garante o domínio correto
       }
     },
     callbackUrl: {

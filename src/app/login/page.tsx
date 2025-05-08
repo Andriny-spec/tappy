@@ -31,12 +31,27 @@ export default function LoginPage() {
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState('');
 
-  // Redirecionar se já estiver logado
+  // Redirecionar se já estiver logado - versão otimizada
   useEffect(() => {
-    if (status === 'authenticated') {
-      router.push('/dashboard');
+    // Verificar de forma mais imediata se há cookies de sessão
+    const hasSession = document.cookie.includes('next-auth.session-token');
+    
+    if (hasSession || status === 'authenticated') {
+      router.replace('/dashboard');
     }
   }, [status, router]);
+  
+  // Impedir que a página seja renderizada se estiver carregando ou autenticado
+  if (status === 'loading' || status === 'authenticated') {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="w-10 h-10 animate-spin">
+          <Loader2 className="w-10 h-10 text-primary" />
+        </div>
+        <p className="mt-2 text-sm text-gray-500">Redirecionando...</p>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,14 +86,7 @@ export default function LoginPage() {
     }
   };
 
-  // Mostrar carregamento se estiver verificando a sessão
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-green-50 to-white">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
-      </div>
-    );
-  }
+  // A verificação de 'loading' já está feita acima, não é necessário repetir aqui
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-green-50 to-white p-4">
