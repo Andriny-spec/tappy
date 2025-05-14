@@ -1,4 +1,8 @@
 import { Suspense } from 'react';
+
+// Força a página a sempre pegar os dados mais recentes em todas as requisições
+// Esta configuração desativa completamente o cache para esta página
+export const dynamic = 'force-dynamic';
 import { 
   Card, 
   CardContent, 

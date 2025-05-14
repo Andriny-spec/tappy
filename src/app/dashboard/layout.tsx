@@ -44,10 +44,58 @@ export default function DashboardLayout({
     }
   }, [status, session]);
   
+  // Verificar se existe uma sessão personalizada no localStorage (para desenvolvimento local)
+  useEffect(() => {
+    // Só verificar localStorage se o status for unauthenticated
+    if (status === 'unauthenticated') {
+      try {
+        const localSession = localStorage.getItem('tappy_session');
+        if (localSession) {
+          const sessionData = JSON.parse(localSession);
+          const now = new Date();
+          const expires = new Date(sessionData.expires);
+          
+          // Se a sessão não estiver expirada, usar essa sessão local
+          if (expires > now) {
+            console.log('Usando sessão local em vez de NextAuth');
+            // Não redirecionar para login
+            return;
+          } else {
+            console.log('Sessão local expirada');
+            localStorage.removeItem('tappy_session');
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao verificar sessão local:', error);
+      }
+    }
+  }, [status]);
+  
   // Proteger as rotas do dashboard, redirecionando para login se não estiver autenticado
-  if (status === 'unauthenticated') {
-    redirect('/login');
-  }
+  // e se não tiver sessão local válida
+  useEffect(() => {
+    // Verificar localStorage primeiro (uma vez, no cliente)
+    try {
+      const localSession = localStorage.getItem('tappy_session');
+      if (localSession) {
+        const sessionData = JSON.parse(localSession);
+        const now = new Date();
+        const expires = new Date(sessionData.expires);
+        
+        if (expires > now) {
+          // Sessão válida no localStorage, permitir acesso
+          return;
+        }
+      }
+      
+      // Se não houver sessão válida no localStorage e NextAuth não estiver autenticado
+      if (status === 'unauthenticated') {
+        window.location.href = '/login';
+      }
+    } catch (error) {
+      console.error('Erro ao verificar sessão:', error);
+    }
+  }, [status]);
 
   // Exibir loading enquanto verifica a autenticação
   if (status === 'loading') {

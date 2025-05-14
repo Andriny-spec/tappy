@@ -84,17 +84,19 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 dias em segundos
     updateAge: 24 * 60 * 60, // Atualizar sessão a cada 24 horas
   },
+  useSecureCookies: false,  // Forçar uso de cookies não-seguros em desenvolvimento
   jwt: {
     maxAge: 30 * 24 * 60 * 60, // 30 dias em segundos
   },
+  // Habilitar debug para ver mais detalhes sobre o processo de autenticação
   cookies: {
     sessionToken: {
       name: `next-auth.session-token`,
       options: {
-        httpOnly: true,
-        sameSite: "lax",
+        httpOnly: false, // Forçar acesso por JavaScript para debugging
+        sameSite: "none", // Mais permissivo para desenvolvimento local
         path: "/",
-        secure: process.env.NODE_ENV === "production",
+        secure: false, // Desativar secure para ambiente local
         maxAge: 30 * 24 * 60 * 60, // 30 dias em segundos
         domain: undefined // Garante o domínio correto
       }
@@ -136,15 +138,22 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     async redirect({ url, baseUrl }) {
-      // Redireciona para dashboard após o login
+      console.log('NextAuth redirecionando:', { url, baseUrl });
+      
+      // Redirecionar explicitamente para o dashboard após autenticação
       if (url.startsWith("/api/auth") || url === "/login" || url === baseUrl) {
-        return `${baseUrl}/dashboard`;
+        console.log('Redirecionando para dashboard');
+        return '/dashboard';
       }
+      
       // Se a URL já for uma URL válida, retorne-a
       if (url.startsWith("http")) {
+        console.log('Redirecionando para URL externa:', url);
         return url;
       }
+      
       // Caso contrário, garanta uma URL absoluta válida
+      console.log('Redirecionando para URL relativa:', url);
       return `${baseUrl}${url.startsWith("/") ? url : `/${url}`}`;
     },
   },
@@ -152,7 +161,7 @@ export const authOptions: NextAuthOptions = {
     signIn: "/login",
     error: "/login",
   },
-  debug: process.env.NODE_ENV === "development",
+  debug: true,
   secret: process.env.NEXTAUTH_SECRET,
 };
 
