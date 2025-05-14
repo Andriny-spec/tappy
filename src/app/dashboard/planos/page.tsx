@@ -71,9 +71,9 @@ async function PlanosStatsWidget() {
   );
 }
 
-async function PlanosListaWrapper() {
+async function PlanosListaWrapper({ platformFilter }: { platformFilter?: string }) {
   try {
-    const { plans, error } = await getAllPlans();
+    const { plans, error } = await getAllPlans(platformFilter);
     return <ListaPlanos planos={plans} erro={error} />;
   } catch (error) {
     console.error('Erro ao carregar planos:', error);
@@ -81,7 +81,14 @@ async function PlanosListaWrapper() {
   }
 }
 
-export default async function PlanosPage() {
+export default async function PlanosPage({
+  searchParams,
+}: {
+  searchParams?: { platform?: string };
+}) {
+  // Obter o filtro da URL (se existir)
+  const platformFilter = searchParams?.platform || 'todos';
+  
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
@@ -104,7 +111,7 @@ export default async function PlanosPage() {
           ))}
         </div>
       }>
-        <PlanosListaWrapper />
+        <PlanosListaWrapper platformFilter={platformFilter} />
       </Suspense>
     </div>
   );

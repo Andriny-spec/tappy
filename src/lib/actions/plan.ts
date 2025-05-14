@@ -5,11 +5,18 @@ import { revalidatePath } from 'next/cache';
 import { PlanFormValues, PlanSchema } from '@/lib/schemas/plan-schema';
 
 /**
- * Busca todos os planos
+ * Busca todos os planos, opcionalmente filtrados por plataforma
  */
-export async function getAllPlans() {
+export async function getAllPlans(platformSlug?: string) {
   try {
+    const where = platformSlug && platformSlug !== 'todos' ? {
+      platform: {
+        slug: platformSlug
+      }
+    } : {};
+    
     const plans = await prisma.plan.findMany({
+      where,
       include: {
         platform: true,
         _count: {

@@ -30,6 +30,21 @@ import { getAllPlatforms } from '@/lib/actions/platform';
 export default function PlanosActions() {
   const router = useRouter();
   const [tab, setTab] = useState('todos');
+  
+  // Função para lidar com a mudança de aba e recarregar a página com o filtro
+  const handleTabChange = (value: string) => {
+    setTab(value);
+    
+    // Adicionar o parâmetro de filtro à URL
+    const url = new URL(window.location.href);
+    url.searchParams.set('platform', value);
+    
+    // Usar router.push para navegar sem recarregar a página inteira
+    router.push(url.toString());
+    
+    // Forçar a revalidação da página para atualizar os dados
+    router.refresh();
+  };
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -99,9 +114,7 @@ export default function PlanosActions() {
     loadPlatforms();
   }, []);
 
-  const handleTabChange = (value: string) => {
-    setTab(value);
-  };
+  // Função atualizada para lidar com a mudança de aba e atualizar o filtro de planos
   
   // Função para gerar conteúdo com IA (DeepSeek)
   const generateWithDeepseek = async (type: 'descrição' | 'recursos' | 'benefícios') => {
